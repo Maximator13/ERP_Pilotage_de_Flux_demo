@@ -1,4 +1,6 @@
-# EOLIA ERP – démonstrateur
+# EOLIA ERP, le démonstrateur
+
+Dans le cadre d'un cours de pilotage de flux, voici une démonstration d'ERP répondant à des problématiques vues en entreprise : 
 
 Démonstrateur d'ERP industriel pour EOLIA, entreprise fictive de tôlerie, assemblage et mécanique, réalisé dans le cadre du cours « Pilotage » (remplacement de Manufacturing PMI).
 
