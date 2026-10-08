@@ -1,0 +1,1364 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EOLIA ERP – Démonstrateur</title>
+<meta name="description" content="Démonstrateur d'ERP industriel pour EOLIA (entreprise fictive de tôlerie) : devis, commande, réf. interne unique, nomenclature par client, allocations, achats, OF, pointage atelier, BL, prix de revient sans frais généraux forfaitaires, comptabilité.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="EOLIA ERP – Démonstrateur">
+<meta property="og:description" content="Un ERP de tôlerie bien automatisé, construit sur les 20 % d'actions qui portent 80 % des gains. Données fictives.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="EOLIA ERP – Démonstrateur">
+<meta name="twitter:description" content="Du devis à l'écriture comptable, sans ressaisie.">
+<meta name="theme-color" content="#1e3a8a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231e3a8a'/%3E%3Cpath d='M21 9H11v14h10M11 16h8' stroke='%23fff' stroke-width='2.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f4f6f9; --surface:#fff; --surface-2:#eef2f7; --ink:#0f172a; --muted:#475569; --line:#d5dce6;
+  --accent:#1e40af; --accent-ink:#fff; --accent-soft:#e0e7ff;
+  --ok:#166534; --ok-soft:#dcfce7; --warn:#92400e; --warn-soft:#fef3c7; --bad:#b91c1c; --bad-soft:#fee2e2;
+  --crit:#b91c1c; --custom:#7c3aed; --custom-soft:#ede9fe; --radius:10px; --mono:ui-monospace,"Cascadia Mono","SFMono-Regular",Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0b1120; --surface:#111a2e; --surface-2:#18233b; --ink:#e5e9f0; --muted:#a3adbf; --line:#2a3650;
+  --accent:#93b4ff; --accent-ink:#0b1120; --accent-soft:#1c2a4d;
+  --ok:#86efac; --ok-soft:#12301f; --warn:#fcd34d; --warn-soft:#3a2a0b; --bad:#fca5a5; --bad-soft:#3b1414; --crit:#fca5a5; --custom:#c4b5fd; --custom-soft:#2a2050;
+}}
+:root[data-theme="dark"]{
+  --bg:#0b1120; --surface:#111a2e; --surface-2:#18233b; --ink:#e5e9f0; --muted:#a3adbf; --line:#2a3650;
+  --accent:#93b4ff; --accent-ink:#0b1120; --accent-soft:#1c2a4d;
+  --ok:#86efac; --ok-soft:#12301f; --warn:#fcd34d; --warn-soft:#3a2a0b; --bad:#fca5a5; --bad-soft:#3b1414; --crit:#fca5a5; --custom:#c4b5fd; --custom-soft:#2a2050;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--accent)}
+h1,h2,h3{line-height:1.2;margin:0}
+h1{font-size:clamp(21px,3.2vw,28px)}
+h2{font-size:17px;margin-bottom:10px}
+h3{font-size:15px;margin:16px 0 6px}
+header.top{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+header.top .in{display:flex;align-items:center;gap:12px;min-height:56px;padding:0 16px;flex-wrap:wrap}
+.brand{font-weight:800;letter-spacing:.5px;font-size:17px;display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink)}
+.brand .logo{width:26px;height:26px;border-radius:6px;background:#1e3a8a;color:#fff;display:grid;place-items:center;font-size:14px}
+.brand small{font-weight:500;color:var(--muted);letter-spacing:0}
+.ctx{display:flex;align-items:center;gap:8px;margin-left:auto;font-size:13px;color:var(--muted)}
+.ctx select{min-height:36px;padding:4px 8px;width:auto;max-width:250px}
+.shell{display:grid;grid-template-columns:minmax(0,1fr);max-width:1400px;margin:0 auto}
+nav.side{background:var(--surface);border-bottom:1px solid var(--line);display:flex;overflow-x:auto;gap:2px;padding:6px 10px;scrollbar-width:thin;position:sticky;top:56px;z-index:9}
+nav.side a{white-space:nowrap;text-decoration:none;color:var(--muted);padding:7px 11px;border-radius:8px;font-size:13.5px;display:flex;gap:8px;align-items:center}
+nav.side a .n{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;width:16px}
+nav.side a:hover{background:var(--surface-2);color:var(--ink)}
+nav.side a[aria-current="page"]{background:var(--accent-soft);color:var(--accent);font-weight:700}
+nav.side .grp{display:none}
+@media (min-width:1024px){
+  .shell{grid-template-columns:230px minmax(0,1fr)}
+  nav.side{flex-direction:column;border-bottom:0;border-right:1px solid var(--line);height:calc(100dvh - 56px);overflow:auto;padding:12px 10px}
+  nav.side .grp{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:12px 11px 4px}
+}
+main{padding:20px 16px 40px;min-width:0}
+.ph{margin-bottom:16px}
+.ph p{margin:6px 0 0;color:var(--muted);max-width:820px}
+.crits{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.critb{font-size:12px;border-radius:999px;padding:2px 9px;background:var(--bad-soft);color:var(--crit);border:1px solid currentColor;text-decoration:none;font-weight:600;white-space:nowrap}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;min-width:0;overflow-x:auto}
+.mt{margin-top:16px}
+.g2{display:grid;gap:16px}
+.g3{display:grid;gap:16px}
+@media (min-width:860px){.g2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.kpi .l{font-size:12px;color:var(--muted)}
+.kpi .v{font-size:21px;font-weight:700;font-variant-numeric:tabular-nums}
+.kpi .d{font-size:12px;color:var(--muted)}
+label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px;font-weight:600}
+select,input[type=number],input[type=date],input[type=search],input[type=text]{width:100%;font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-height:40px}
+input.mini{width:86px;min-height:34px;padding:4px 6px;text-align:right}
+select.mini{width:auto;min-height:34px;padding:4px 6px}
+input:disabled{opacity:.6}
+select:focus-visible,input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+[aria-invalid="true"]{border:2px solid var(--bad)!important}
+.err{color:var(--bad);font-size:12.5px;font-weight:600;margin:4px 0 0;text-align:left}
+.check{display:flex;gap:8px;align-items:flex-start;margin-top:10px;font-size:14px;color:var(--ink);font-weight:500}
+.check input{width:18px;height:18px;margin-top:2px;accent-color:var(--accent)}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);padding:7px 12px;min-height:38px}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+button.sm{min-height:32px;padding:4px 10px;font-size:13px}
+button:disabled{opacity:.45;cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.row>*{flex:1;min-width:150px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;font-size:14px}
+.kv dt{color:var(--muted)}.kv dd{margin:0;font-weight:600;text-align:right}
+.mono{font-family:var(--mono)}
+.muted{color:var(--muted)}.small{font-size:12.5px}
+.alert{border-radius:8px;padding:10px 12px;font-size:14px;border:1px solid}
+.alert.ok{background:var(--ok-soft);color:var(--ok)}.alert.warn{background:var(--warn-soft);color:var(--warn)}.alert.bad{background:var(--bad-soft);color:var(--bad)}.alert.info{background:var(--accent-soft);color:var(--accent)}
+.alert b{color:inherit}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:600;background:var(--surface-2)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tfoot td{font-weight:700;border-top:2px solid var(--line)}
+tr.click{cursor:pointer}tr.click:hover td{background:var(--surface-2)}
+tr.sel td{background:var(--accent-soft)}
+tr.arch td{opacity:.55}
+tr.custom td{background:var(--custom-soft)}
+tr.lvl0 td{font-weight:700}tr.lvl1 td:first-child{padding-left:24px}tr.lvl2 td:first-child{padding-left:44px}
+.type{font-size:11px;font-weight:700;border-radius:4px;padding:1px 6px;background:var(--surface-2);border:1px solid var(--line);white-space:nowrap}
+.type.PF{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}.type.SE{background:var(--accent-soft);color:var(--accent)}
+.cust{font-size:11px;font-weight:700;border-radius:4px;padding:1px 6px;background:var(--custom-soft);color:var(--custom);border:1px solid currentColor;white-space:nowrap}
+.st{font-size:12px;font-weight:700;white-space:nowrap;border-radius:999px;padding:2px 8px;border:1px solid currentColor;display:inline-block}
+.st.ok{color:var(--ok)}.st.bad{color:var(--bad)}.st.warn{color:var(--warn)}.st.info{color:var(--accent)}.st.mut{color:var(--muted)}
+.bar{height:10px;border-radius:5px;background:var(--surface-2);overflow:hidden}.bar>span{display:block;height:100%;background:var(--accent)}
+.loadrow{display:grid;grid-template-columns:96px 1fr 64px;gap:10px;align-items:center;font-size:13.5px;margin:6px 0}
+.formula{font-size:13.5px;background:var(--surface-2);border-radius:8px;padding:10px 12px;line-height:1.7}
+.labels{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.label{background:#fff;color:#000;border:1px solid #9aa4b2;border-radius:6px;padding:10px 12px;font-family:var(--mono);font-size:12px;line-height:1.35}
+.label .t{display:flex;justify-content:space-between;font-family:system-ui,sans-serif;font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:#333;border-bottom:1px solid #000;padding-bottom:4px;margin-bottom:6px}
+.label .ref{font-size:17px;font-weight:700;font-family:system-ui,sans-serif}
+.label svg{width:100%;height:46px;display:block;margin-top:6px}
+.label .hr{text-align:center;font-size:11px;letter-spacing:1px}
+.kanban{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(190px,1fr);gap:10px;overflow-x:auto;padding-bottom:6px}
+.col{background:var(--surface-2);border-radius:10px;padding:8px;min-height:180px;border:2px dashed transparent}
+.col.over{border-color:var(--accent)}
+.col h3{margin:2px 4px 8px;font-size:13.5px;display:flex;justify-content:space-between}
+.kc{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:8px;padding:8px;margin-bottom:8px;font-size:12.5px}
+.kc[draggable="true"]{cursor:grab}
+.kc.other{border-left-color:var(--muted);opacity:.78}
+.kc.rework{border-left-color:var(--bad)}
+.kc b{font-family:var(--mono)}
+.wf{display:grid;grid-template-columns:minmax(150px,250px) minmax(0,1fr) 92px;gap:8px 10px;align-items:center;font-size:13.5px}
+.wf .track{position:relative;height:20px}
+.wf .track span{position:absolute;top:0;height:100%;border-radius:4px}
+.bc svg,.of svg{height:34px;width:100%;max-width:260px;display:block;margin:6px 0;color:var(--ink)}
+.panel{border:1px dashed var(--accent);border-radius:8px;padding:12px;margin-top:10px;background:var(--surface)}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:14px;z-index:20;max-width:calc(100% - 32px)}
+.toast.bad{background:var(--bad);color:#fff}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:24px;flex-wrap:wrap}
+.pager a{text-decoration:none;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:10px 14px;color:var(--ink);font-size:14px}
+.pager a small{display:block;color:var(--muted);font-size:12px}
+.pager a:hover{border-color:var(--accent)}
+.badge-btn{display:flex;flex-wrap:wrap;gap:8px}
+.badge-btn button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+footer{border-top:1px solid var(--line);color:var(--muted);font-size:13px;padding:18px 16px 28px;max-width:1400px;margin:0 auto}
+.print-only{display:none}
+@media print{
+  header.top,nav.side,.pager,footer,.no-print,.toast{display:none!important}
+  body{background:#fff;color:#000;font-size:11.5px}
+  .shell{display:block}main{padding:0}.card{border:0;padding:0}
+  th{background:#eef2f7!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;color:#333}
+  td,th{padding:4px 6px}.print-only{display:block}tr{break-inside:avoid}@page{margin:14mm}
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="in">
+  <a class="brand" href="#/accueil"><span class="logo" aria-hidden="true">E</span>EOLIA <small>ERP · démonstrateur</small></a>
+  <div class="ctx no-print"><label for="activeOrder" style="margin:0">Commande active</label><select id="activeOrder"></select></div>
+  <button type="button" id="themeBtn" class="no-print" aria-label="Basculer le thème clair / sombre">◐</button>
+</div></header>
+<div class="shell">
+  <nav class="side" id="nav" aria-label="Pages de l'ERP"></nav>
+  <main id="view" tabindex="-1"></main>
+</div>
+<footer>EOLIA est une entreprise fictive. Démonstrateur pédagogique : clients, articles, prix, fournisseurs et gains estimés sont inventés. Tous les calculs se font dans votre navigateur ; aucune donnée n'est envoyée, aucun cookie n'est déposé. Recharger la page remet la démo à zéro.</footer>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+"use strict";
+// ═══════════════════════════ Dates ═══════════════════════════
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+const D = d => typeof d === "string" ? (([y,m,j]) => new Date(y, m-1, j))(d.split("-").map(Number)) : new Date(d); // date ISO lue en heure locale
+function addWorkdays(d, n){ const r = D(d), s = Math.sign(n); n = Math.abs(n);
+  while (n > 0){ r.setDate(r.getDate()+s); if (r.getDay()%6) n--; } return r; }
+const iso = d => new Date(d.getTime() - d.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+const wd = n => iso(addWorkdays(TODAY, n));
+const workdaysUntil = d => { let n = 0; const r = new Date(TODAY); const t = D(d); while (r < t){ r.setDate(r.getDate()+1); if (r.getDay()%6) n++; } return n; };
+const pad = (n, w=5) => String(n).padStart(w, "0");
+
+// ═══════════════════════════ Référentiels (fictifs) ═══════════════════════════
+const VAT = 0.20, LABOR_RATE = 36, PER_PALLET = 20, KG_PER_M2 = 11.775, TARGET_MARGIN = 0.15;
+const LAUNCH = { hours:3, rate:45 }; // ADV + programmation laser + ordonnancement, par commande
+const INTERNAL = "PF-00128";
+
+// Tarif négocié par client, exprimé aux 100 pièces (G2) : il ne baisse pas avec la quantité.
+const CLIENTS = [
+  { code:"C-00017", name:"Agencements Rhône", city:"Villeurbanne (69)", country:"FR", zone:"RA", transit:1, incoterm:"DAP", account:"411C00017", outstanding:6200, limit:60000, price100:13600, ref:"AR-CAB-7740", index:"C", legacy:"AGR-COF6040", legacyCost:108.20 },
+  { code:"C-00042", name:"BTP Nord Services", city:"Lille (59)", country:"FR", zone:"NORD", transit:2, incoterm:"DDP", account:"411C00042", outstanding:27800, limit:30000, price100:14200, ref:"BNS/552-120", index:"03", legacy:"BTP-COF600", legacyCost:121.50 },
+  { code:"C-00058", name:"Maes Installaties BV", city:"Gand (BE)", country:"BE", zone:"BE", transit:2, incoterm:"DAP", account:"411C00058", outstanding:0, limit:40000, price100:13900, vat:"BE0123456789", ref:"MI-88-0412", index:"C", legacy:"MAE-0412", legacyCost:99.80 },
+];
+// Action critique n° 1 (2) et n° 4 : base de sous-ensembles standard + personnalisation par client.
+const CUSTOM = {
+  "C-00017":{ label:"Plaque gravée au logo du client", add:[{ code:"CSO-00036", qty:1 }] },
+  "C-00042":{ label:"Joint renforcé IP65 (chantiers extérieurs)", replace:{ "CPT-00195":"CPT-00197" } },
+  "C-00058":{ label:"Notice de montage bilingue NL/FR", add:[{ code:"CSO-00038", qty:1 }] },
+};
+const CARRIERS = {
+  GERB:{ name:"Transports Gerbier", rates:{ RA:95, NORD:145, BE:185 } },
+  ALPX:{ name:"Alpes Express Messagerie", rates:{ RA:88, NORD:158, BE:210 } },
+};
+const M = {
+  "LASER-01":{label:"Laser fibre", rate:95}, "POINC-02":{label:"Poinçonneuse", rate:62},
+  "PLI-03":{label:"Presse plieuse", rate:48}, "SOUD-01":{label:"Poste soudure", rate:12}, "MONT-01":{label:"Îlot montage", rate:0},
+};
+const OPERATORS = { "B-0007":"Lucas Martin", "B-0012":"Inès Roche", "B-0015":"Karim Haddad", "B-0021":"Sophie Vidal" };
+
+// Articles. hist = journal des mouvements (rejoué pour obtenir stock, lots FIFO et PMAP).
+const init = (lot, qty, cost, days=-60) => [{ date:wd(days), type:"IN", lot, qty, price:cost, freight:0, init:true }];
+const A = {
+  "PF-00128":{type:"PF", label:"Coffret électrique 600×400×250 gris clair", unit:"PCE", index:"C", weight:11.0, customs:"8538 10 00", drawing:"EOL-PL-0128"},
+  "SE-00311":{type:"SE", label:"Caisson soudé 600×400×250", unit:"PCE", weight:7.3, drawing:"EOL-PL-0311"},
+  "SE-00312":{type:"SE", label:"Porte équipée 600×400", unit:"PCE", weight:3.7, drawing:"EOL-PL-0312"},
+  "MP-00052":{type:"MP", label:"Tôle acier S235 ép. 1,5 mm", unit:"KG", weight:1, safety:200, lead:5, loc:"MAG-A-01-01", supplier:"F-00008 Aciers du Forez",
+    conv:[["M2",KG_PER_M2],["FMT",52.9875]], buy:{unit:"FMT", factor:52.9875, note:"format 3000×1500 = 52,99 kg"},
+    hist:[
+      { date:wd(-70), type:"IN", lot:"LOT26-000088", qty:1400, price:1.19, freight:70 },
+      { date:wd(-28), type:"OUT", ref:"OF26-00419 · CC26-00598", qty:916 },
+      { date:wd(-18), type:"OUT", ref:"OF26-00432 · CC26-00605", qty:458 },
+      { date:wd(-14), type:"IN", lot:"LOT26-000131", qty:800, price:1.46, freight:48 },
+      { date:wd(-5), type:"IN", lot:"LOT26-000140", qty:4000, price:1.41, freight:140 },
+      { date:wd(-3), type:"OUT", ref:"OF26-00447/448 · CC26-00614", qty:2289 },
+    ]},
+  "CPT-00210":{type:"COMPOSANT", label:"Goujon à souder M6×16", unit:"PCE", weight:0.004, reservedOther:300, safety:500, dpa:0.052, lead:4, loc:"MAG-B-02-03", supplier:"F-00014 Visserie Lyonnaise", conv:[["BTE",500]], buy:{unit:"BTE", factor:500}, hist:[...init("LOT26-000102", 2600, 0.045), { date:wd(-3), type:"OUT", ref:"OF26-00447 · CC26-00614", qty:1600 }]},
+  "CPT-00188":{type:"COMPOSANT", label:"Charnière invisible 120°", unit:"PCE", weight:0.12, safety:60, dpa:3.10, lead:10, loc:"MAG-B-03-01", supplier:"F-00021 Ferrures Industrie", buy:{unit:"PCE", factor:1, moq:50}, hist:init("LOT26-000109", 140, 2.85)},
+  "CPT-00190":{type:"COMPOSANT", label:"Serrure ¼ tour clé 8 mm", unit:"PCE", weight:0.09, safety:30, dpa:4.35, lead:7, loc:"MAG-B-03-02", supplier:"F-00021 Ferrures Industrie", buy:{unit:"PCE", factor:1, moq:25}, replacement:"CPT-00191", hist:init("LOT26-000111", 90, 4.10)},
+  "CPT-00191":{type:"COMPOSANT", label:"Serrure ¼ tour clé triangle", unit:"PCE", weight:0.09, reservedOther:20, safety:30, dpa:4.40, lead:5, loc:"MAG-B-03-03", supplier:"F-00027 Serrurerie Alpes", buy:{unit:"PCE", factor:1, moq:25}, hist:init("LOT26-000097", 420, 4.32, -150)},
+  "CPT-00195":{type:"COMPOSANT", label:"Joint mousse PU 10×5", unit:"M", weight:0.01, safety:50, dpa:0.66, lead:6, loc:"MAG-B-04-01", supplier:"F-00014 Visserie Lyonnaise", conv:[["RLX",25]], buy:{unit:"RLX", factor:25, note:"rouleau de 25 m"}, hist:init("LOT26-000115", 310, 0.62)},
+  "CPT-00197":{type:"COMPOSANT", label:"Joint renforcé IP65 12×6", unit:"M", weight:0.015, safety:40, dpa:1.02, lead:8, loc:"MAG-B-04-02", supplier:"F-00014 Visserie Lyonnaise", conv:[["RLX",25]], buy:{unit:"RLX", factor:25, note:"rouleau de 25 m"}, hist:init("LOT26-000121", 180, 0.95)},
+  "ST-00007":{type:"SOUS_TRAITANCE", label:"Thermolaquage gris clair", unit:"M2", pmap:6.20, dpa:6.20, lead:4, supplier:"F-00031 Thermolaquage Rhône", noStock:true},
+  "CSO-00031":{type:"CONSOMMABLE", label:"Plaque signalétique polyester", unit:"PCE", weight:0.005, safety:200, dpa:0.19, lead:5, loc:"MAG-C-01-01", supplier:"F-00040 Étiq'Pro", conv:[["RLX",1000]], buy:{unit:"RLX", factor:1000}, hist:init("LOT26-000099", 500, 0.18)},
+  "CSO-00034":{type:"CONSOMMABLE", label:"Étiquette colis 100×150", unit:"PCE", weight:0.003, safety:300, dpa:0.04, lead:5, loc:"MAG-C-01-02", supplier:"F-00040 Étiq'Pro", conv:[["RLX",1000]], buy:{unit:"RLX", factor:1000}, hist:init("LOT26-000100", 1000, 0.04)},
+  "CSO-00036":{type:"CONSOMMABLE", label:"Plaque gravée logo client (Agencements Rhône)", unit:"PCE", weight:0.02, safety:50, dpa:0.70, lead:6, loc:"MAG-C-01-03", supplier:"F-00040 Étiq'Pro", buy:{unit:"PCE", factor:1, moq:100}, hist:init("LOT26-000118", 300, 0.65)},
+  "CSO-00038":{type:"CONSOMMABLE", label:"Notice de montage NL/FR (Maes)", unit:"PCE", weight:0.04, safety:100, dpa:0.32, lead:5, loc:"MAG-C-01-04", supplier:"F-00052 Imprimerie Dauphinoise", conv:[["PAQ",250]], buy:{unit:"PAQ", factor:250}, hist:init("LOT26-000119", 500, 0.30)},
+  "EMB-00012":{type:"EMBALLAGE", label:"Carton double cannelure 650×450×300", unit:"PCE", weight:1.1, safety:40, dpa:2.55, lead:3, loc:"MAG-D-01-01", supplier:"F-00044 Cartonnages du Lyonnais", conv:[["PAQ",50]], buy:{unit:"PAQ", factor:50}, hist:init("LOT26-000123", 400, 2.40)},
+  "EMB-00015":{type:"EMBALLAGE", label:"Calage mousse d'angle", unit:"PCE", weight:0.15, safety:100, dpa:0.85, lead:3, loc:"MAG-D-01-02", supplier:"F-00044 Cartonnages du Lyonnais", conv:[["SAC",100]], buy:{unit:"SAC", factor:100}, hist:init("LOT26-000124", 900, 0.85)},
+  "EMB-00020":{type:"EMBALLAGE", label:"Palette perdue 1200×800", unit:"PCE", weight:18, safety:10, dpa:9.80, lead:3, loc:"MAG-D-02-01", supplier:"F-00047 Palettes Sud-Est", buy:{unit:"PCE", factor:1, moq:10}, hist:init("LOT26-000125", 24, 9.50)},
+  // Anciens codes PMI « un article par client », archivés après fusion (action critique n° 1).
+  "AGR-COF6040":{type:"PF", label:"COFFRET 600X400 AGR (ancien code PMI)", unit:"PCE", weight:11.0, archived:{ date:wd(-6), reason:"Fusionné dans PF-00128 (action critique n° 1)" }},
+  "BTP-COF600":{type:"PF", label:"COFFRET 600 BTP NORD (ancien code PMI)", unit:"PCE", weight:11.0, archived:{ date:wd(-6), reason:"Fusionné dans PF-00128 (action critique n° 1)" }},
+  "MAE-0412":{type:"PF", label:"COFFRET MAES 0412 (ancien code PMI)", unit:"PCE", weight:11.0, archived:{ date:wd(-6), reason:"Fusionné dans PF-00128 (action critique n° 1)" }},
+};
+const ALT_SUPPLIERS = { MP:["F-00012 Métaux du Dauphiné","F-00019 Aciers Rhodaniens"], COMPOSANT:["F-00066 Quincaillerie Bressane","F-00071 Ferrures du Jura"],
+  CONSOMMABLE:["F-00058 Imprim'Alpes","F-00061 Signalétique Savoie"], EMBALLAGE:["F-00049 Emballages Savoyards","F-00055 Cartonnerie de l'Ain"] };
+// Allocation mensuelle de stock pour les clients récurrents (action critique n° 3).
+const ALLOC = { "MP-00052":{ "C-00017":500, "C-00042":300 }, "CPT-00188":{ "C-00017":80 }, "EMB-00012":{ "C-00017":60 } };
+
+const stocked = code => A[code].hist && !A[code].archived;
+// Rejoue le journal : PMAP recalculé à chaque entrée (prix + fret), sorties FIFO sans effet sur le PMAP.
+function replay(a){
+  let stock = 0, pmap = 0, lots = [], lastIn = null;
+  for (const m of a.hist){
+    if (m.type === "IN"){ const cost = m.price + (m.freight||0)/m.qty;
+      pmap = stock > 0 ? (stock*pmap + m.qty*cost)/(stock + m.qty) : cost;
+      stock += m.qty; lots.push({ lot:m.lot, date:m.date, qty:m.qty, cost }); if (!m.init) lastIn = m.price; }
+    else { let q = m.type === "OUT" ? m.qty : -m.qty; // ADJ : m.qty signé (+ = surplus)
+      if (m.type === "ADJ"){ const l = lots.find(x => x.lot === m.lot) || lots.at(-1); l.qty -= q; stock -= q; }
+      else { stock -= q; for (const l of lots){ const t = Math.min(l.qty, q); l.qty -= t; q -= t; if (!q) break; } } }
+    m.stockAfter = stock; m.pmapAfter = pmap;
+  }
+  a.stock = stock; a.pmap = pmap; a.lots = lots.filter(l => l.qty > 1e-9);
+  if (lastIn != null) a.dpa = lastIn;
+}
+Object.values(A).filter(a => a.hist).forEach(replay);
+
+// ═══════════════════════════ État de la démo ═══════════════════════════
+const S = {
+  orders:[
+    { no:"CC26-00612", client:0, qty:120, received:wd(-1), wish:wd(21), status:"A_LANCER", of:451, quote:"DV26-00088", bls:[], picked:{} },
+    { no:"CC26-00613", client:1, qty:60, received:wd(0), wish:wd(12), status:"A_LANCER", of:454, bls:[], picked:{} },
+    { no:"CC26-00614", client:2, qty:200, received:wd(-8), wish:wd(20), status:"EN_FAB", of:446, bls:[{ no:"BL26-00377", date:wd(-2), qty:80, inv:"FA26-01185" }], picked:{ "MP-00052":true, "CPT-00210":true } },
+    { no:"CC26-00605", client:0, qty:40, received:wd(-22), wish:wd(-3), status:"EXPEDIEE", of:431, bls:[{ no:"BL26-00371", date:wd(-4), qty:40, inv:null }], picked:{} },
+    { no:"CC26-00598", client:1, qty:80, received:wd(-32), wish:wd(-20), status:"FACTUREE", of:418, bls:[{ no:"BL26-00362", date:wd(-22), qty:80, inv:"FA26-01179" }], picked:{} },
+  ],
+  invoices:[
+    { no:"FA26-01179", date:wd(-22), order:"CC26-00598", bl:"BL26-00362", qty:80, price:142, exported:true },
+    { no:"FA26-01185", date:wd(-2), order:"CC26-00614", bl:"BL26-00377", qty:80, price:139, exported:false },
+  ],
+  quotes:[
+    { no:"DV26-00088", date:wd(-3), client:0, qty:120, wish:wd(21), price:136, target:0.20, status:"ACCEPTE", order:"CC26-00612" },
+    { no:"DV26-00091", date:wd(-2), client:1, qty:25, wish:wd(18), price:158.40, target:0.20, status:"ENVOYE" },
+    { no:"DV26-00093", date:wd(-9), client:2, qty:15, wish:wd(5), price:174.50, target:0.20, status:"PERDU", reason:"Délai trop long" },
+  ],
+  pos:[
+    { no:"CF26-00228", date:wd(-7), supplier:"F-00021 Ferrures Industrie", order:"CC26-00614",
+      lines:[{ code:"CPT-00188", packs:200, unit:"PCE", qtyStock:200, price:3.10, due:wd(3), received:0 }, { code:"CPT-00190", packs:50, unit:"PCE", qtyStock:50, price:4.35, due:wd(3), received:0 }] },
+  ],
+  ncs:[], reworks:[], rfqs:[], suppliersAdded:[],
+  seq:{ cc:615, of:457, bl:378, fa:1186, cf:229, dv:94, lot:141, nc:12, dp:41 },
+  active:0, grouped:true, article:"PF-00128", artFilter:"", artType:"", showArchived:false, snIndex:0, glossQ:"", histArt:"MP-00052",
+  form:{}, rcv:null, rfq:null, offerChoice:{}, ncOf:null, count:null, invSel:null,
+  lastCount:{ "MP-00052":wd(-25), "CPT-00188":wd(-70), "CPT-00190":wd(-40), "CPT-00210":wd(-100), "CPT-00191":wd(-200), "EMB-00012":wd(-95), "CPT-00195":wd(-50), "EMB-00015":wd(-120), "EMB-00020":wd(-30), "CSO-00031":wd(-300), "CSO-00034":wd(-280), "CSO-00036":wd(-10), "CSO-00038":wd(-10), "CPT-00197":wd(-60) },
+  routing:{
+    "SE-00311":[
+      {seq:10,label:"Découpe",machine:"LASER-01",times:{"LASER-01":[15,4.2],"POINC-02":[25,6.8]},ops:1,cut:true},
+      {seq:20,label:"Pliage",machine:"PLI-03",times:{"PLI-03":[20,6.5]},ops:1},
+      {seq:30,label:"Soudure",machine:"SOUD-01",times:{"SOUD-01":[10,18]},ops:1}],
+    "SE-00312":[
+      {seq:10,label:"Découpe",machine:"LASER-01",times:{"LASER-01":[15,2.1],"POINC-02":[25,3.6]},ops:1,cut:true},
+      {seq:20,label:"Pliage",machine:"PLI-03",times:{"PLI-03":[20,3.4]},ops:1},
+      {seq:40,label:"Montage porte",machine:"MONT-01",times:{"MONT-01":[0,9]},ops:1}],
+    "PF-00128":[
+      {seq:50,label:"Assemblage final",machine:"MONT-01",times:{"MONT-01":[5,7]},ops:2},
+      {seq:60,label:"Contrôle & conditionnement",machine:"MONT-01",times:{"MONT-01":[0,5]},ops:1}],
+  },
+  // Pointages de l'OF Maes : la production colle à la gamme, la mise en route non (attente matière).
+  pointages:[
+    { at:"07:12", badge:"B-0007", op:"OF26-00447-010", kind:"SETUP", min:36, wait:19 },
+    { at:"07:48", badge:"B-0007", op:"OF26-00447-010", kind:"RUN", min:842 },
+    { at:"08:05", badge:"B-0012", op:"OF26-00448-010", kind:"SETUP", min:31, wait:16 },
+    { at:"09:40", badge:"B-0015", op:"OF26-00447-020", kind:"SETUP", min:27, wait:8 },
+    { at:"10:07", badge:"B-0015", op:"OF26-00447-020", kind:"RUN", min:1303 },
+    { at:"13:10", badge:"B-0015", op:"OF26-00448-020", kind:"SETUP", min:24, wait:5 },
+    { at:"14:02", badge:"B-0021", op:"OF26-00447-030", kind:"SETUP", min:13, wait:4 },
+  ],
+  sim:{ badge:null, kind:"SETUP" },
+};
+function cheapest(zone){ return Object.entries(CARRIERS).sort((a,b)=>a[1].rates[zone]-b[1].rates[zone])[0][0]; }
+S.orders.forEach(o => Object.assign(o, { carrier:cheapest(CLIENTS[o.client].zone), useRepl:false, override:false, machines:{} }));
+
+// ═══════════════════════════ Règles de gestion ═══════════════════════════
+const OPEN = ["A_LANCER","BLOQUEE","EN_FAB"], LOCKED = ["EN_FAB","EXPEDIEE","FACTUREE"];
+const delivered = o => o.bls.reduce((s,b)=>s+b.qty,0);
+const ral = o => o.qty - delivered(o);
+const priceOf = o => o.price ?? CLIENTS[o.client].price100/100;
+const ofNo = n => `OF26-${pad(n)}`;
+
+function tree(o){
+  const cu = CUSTOM[CLIENTS[o.client].code] || {}, rep = c => (cu.replace||{})[c] || c;
+  return { code:INTERNAL, qty:1, ops:S.routing[INTERNAL], children:[
+    { code:"SE-00311", qty:1, ops:S.routing["SE-00311"], children:[
+        { code:"MP-00052", input:0.62, inputUnit:"M2", qty:0.62*KG_PER_M2, scrap:0.08 }, { code:"CPT-00210", qty:8 } ] },
+    { code:"SE-00312", qty:1, ops:S.routing["SE-00312"], children:[
+        { code:"MP-00052", input:0.28, inputUnit:"M2", qty:0.28*KG_PER_M2, scrap:0.08 },
+        { code:"CPT-00188", qty:2 }, { code:"CPT-00190", qty:1 },
+        { code:rep("CPT-00195"), qty:1.9, custom:rep("CPT-00195")!=="CPT-00195" } ] },
+    { code:"ST-00007", qty:1.8 }, { code:"CSO-00031", qty:1 }, { code:"CSO-00034", qty:1 },
+    { code:"EMB-00012", qty:1 }, { code:"EMB-00015", qty:2 }, { code:"EMB-00020", qty:1/PER_PALLET, note:"1 palette / 20 coffrets" },
+    ...(cu.add||[]).map(x => ({ ...x, custom:true })),
+  ]};
+}
+function explode(root, N, useRepl){
+  const rows = [], needs = {};
+  (function walk(node, mult, lvl, parent){
+    const code = useRepl && A[node.code].replacement ? A[node.code].replacement : node.code;
+    const total = node.qty * (1 + (node.scrap||0)) * mult;
+    rows.push({ ...node, code, lvl, total, parent });
+    if (node.children) node.children.forEach(c => walk(c, total, lvl+1, node.code));
+    else needs[code] = (needs[code]||0) + total;
+  })(root, N, 0, null);
+  return { rows, needs };
+}
+// Besoins restants d'une commande ouverte : sur le reste à livrer, hors articles déjà sortis du magasin.
+function remaining(o){
+  if (!OPEN.includes(o.status) || ral(o) <= 0) return {};
+  const n = explode(tree(o), ral(o), o.useRepl).needs;
+  Object.keys(o.picked).forEach(c => delete n[c]);
+  return n;
+}
+const reservedOF = code => (A[code].reservedOther||0) + S.orders.filter(o=>o.status==="EN_FAB").reduce((s,o)=>s+(remaining(o)[code]||0),0);
+const allocTotal = code => Object.values(ALLOC[code]||{}).reduce((s,v)=>s+v,0);
+const openCF = (orderNo, code) => S.pos.filter(p=>p.order===orderNo).flatMap(p=>p.lines).filter(l=>l.code===code).reduce((s,l)=>s+l.qtyStock-l.received,0);
+const cfDue = (orderNo, code) => S.pos.filter(p=>p.order===orderNo).flatMap(p=>p.lines).filter(l=>l.code===code && l.qtyStock>l.received).map(l=>l.due).sort().at(-1);
+const pegRcv = (orderNo, code) => { const o = S.orders.find(x => x.no === orderNo); if (!o) return 0;
+  return Math.min(remaining(o)[code]||0, S.pos.filter(p=>p.order===orderNo).flatMap(p=>p.lines).filter(l=>l.code===code).reduce((s,l)=>s+l.received,0)); };
+const prioKey = o => [o.status==="EN_FAB"?0:1, o.wish, o.no].join("|");
+
+// Calcul des besoins nets par priorité (OF lancés d'abord, puis date souhaitée) :
+// chaque commande consomme d'abord l'allocation de son client, puis le stock libre restant.
+function mrp(o, { noAlloc=false } = {}){
+  const need = remaining(o), c = CLIENTS[o.client], key = prioKey(o);
+  const prior = S.orders.filter(p => p !== o && OPEN.includes(p.status) && prioKey(p) < key).sort((a,b)=>prioKey(a)<prioKey(b)?-1:1);
+  const out = {};
+  for (const code of Object.keys(need)){
+    const a = A[code];
+    if (a.noStock){ const cf = openCF(o.no, code); out[code] = { code, need:need[code], st:true, onOrder:cf, toOrder:Math.max(0, need[code]-cf) }; continue; }
+    const alloc = noAlloc ? {} : { ...(ALLOC[code]||{}) };
+    let pool = a.stock - (a.reservedOther||0) - (noAlloc ? 0 : allocTotal(code)) - S.orders.filter(p=>OPEN.includes(p.status)).reduce((s,p)=>s+pegRcv(p.no,code),0), taken = 0, used = 0;
+    for (const p of prior){
+      const pn = remaining(p)[code] || 0; if (!pn) continue;
+      const pc = CLIENTS[p.client].code, fromAlloc = Math.min(alloc[pc]||0, pn); alloc[pc] = (alloc[pc]||0) - fromAlloc; used += fromAlloc;
+      const rest = Math.max(0, pn - fromAlloc - openCF(p.no, code) - pegRcv(p.no, code)); taken += Math.min(rest, Math.max(0, pool)); pool -= rest; // ne compte que ce qui était réellement disponible
+    }
+    const avail = Math.max(0, Math.min(Math.max(0, pool) + (alloc[c.code]||0), a.stock - (a.reservedOther||0) - taken - used)) + pegRcv(o.no, code), cf = openCF(o.no, code), nd = need[code];
+    const short = Math.max(0, nd - avail - cf), projected = avail + cf - nd, gap = (a.safety||0) - projected;
+    let buy = 0; if (gap > 1e-9){ buy = Math.ceil(gap / a.buy.factor - 1e-9); if (a.buy.moq) buy = Math.max(buy, a.buy.moq); }
+    const lead = short > 0 ? (S.offerChoice[code]?.lead ?? a.lead) : (nd > avail + 1e-9 && cf ? workdaysUntil(cfDue(o.no, code)) : 0);
+    out[code] = { code, need:nd, avail, onOrder:cf, short, buy, buyStock:buy*a.buy.factor, belowSafety:!short && buy>0, lead, taken, alloc:alloc[c.code]||0 };
+  }
+  return out;
+}
+const setupOf = op => op.times[op.machine][0], runOf = op => op.times[op.machine][1];
+const lineRate = op => M[op.machine].rate + op.ops*LABOR_RATE;
+
+// ponytail: capacité infinie par commande (pas de file d'attente sur le goulot MONT-01) ; à ajouter si le planning devient prévisionnel.
+function compute(o, light=false){
+  const c = CLIENTS[o.client], N = Math.max(1, o.qty), t = tree(o);
+  const { rows, needs } = explode(t, N, o.useRepl);
+  const unitPrice = priceOf(o), closed = !OPEN.includes(o.status);
+  const totalHT = Math.round(N*unitPrice*100)/100, isEU = c.country !== "FR";
+  const tva = isEU ? 0 : Math.round(totalHT*VAT*100)/100, ttc = totalHT + tva;
+
+  const ofs = [
+    { no:ofNo(o.of+1), code:"SE-00311", ops:t.children[0].ops },
+    { no:ofNo(o.of+2), code:"SE-00312", ops:t.children[1].ops },
+    { no:ofNo(o.of), code:INTERNAL, ops:t.ops, parent:true },
+  ];
+  const load = {}, cutSeen = new Set(); let setupCost = 0, runCost = 0, runCost1op = 0;
+  ofs.forEach(of => { of.cost = 0; of.hours = 0; of.lines = of.ops.map((base, idx) => {
+    const op = { ...base, machine:(o.machines||{})[`${of.code}|${idx}`] || base.machine }; // affectation propre à la commande
+    const shared = op.cut && S.grouped && cutSeen.has(op.machine); if (op.cut) cutSeen.add(op.machine);
+    const setup = shared ? 0 : setupOf(op), run = runOf(op);
+    const hours = (setup + run*N)/60, sc = setup/60*lineRate(op), rc = run*N/60*lineRate(op);
+    setupCost += sc; runCost += rc; runCost1op += run*N/60*(M[op.machine].rate + LABOR_RATE);
+    load[op.machine] = (load[op.machine]||0) + hours; of.cost += sc + rc; of.hours += hours;
+    return { op, art:of.code, idx, setup, run, shared, cost:sc+rc, unitCost:(sc+rc)/N, code:`${of.no}-${pad(op.seq,3)}` };
+  }); });
+  const maxLoad = Math.max(...Object.values(load));
+
+  // Transport : coût standard par coffret (palette pleine) dans le PRV, coût réel affiché à l'expédition.
+  const rate = CARRIERS[o.carrier].rates[c.zone], pallets = Math.ceil(N/PER_PALLET);
+  const transportStd = N * rate / PER_PALLET, transportReal = pallets * rate;
+  const unitGross = A[INTERNAL].weight + A["EMB-00012"].weight + 2*A["EMB-00015"].weight;
+  const gross = N*unitGross + pallets*A["EMB-00020"].weight, net = N*A[INTERNAL].weight;
+
+  const cat = { MP:"Matière", COMPOSANT:"Composants", CONSOMMABLE:"Consommables", EMBALLAGE:"Emballage", SOUS_TRAITANCE:"Sous-traitance" };
+  const launch = LAUNCH.hours * LAUNCH.rate;
+  const costs = { "Matière":0, "Composants":0, "Sous-traitance":0, "Consommables":0, "Emballage":0,
+    "Production (machine + MO)":runCost, "Mise en route":setupCost, "Lancement (ADV, programmation)":launch, "Transport (standard)":transportStd };
+  let matOld = 0, matNew = 0, customCost = 0;
+  Object.entries(needs).forEach(([code, need]) => { const a = A[code]; costs[cat[a.type]] += need*a.pmap;
+    if (["MP","COMPOSANT","SOUS_TRAITANCE"].includes(a.type)) { matOld += need*a.dpa; matNew += need*a.pmap; } });
+  const repl = Object.fromEntries(Object.entries(CUSTOM[c.code]?.replace||{}).map(([a0,b0])=>[b0,a0]));
+  rows.filter(r => r.custom).forEach(r => customCost += r.total * (A[r.code].pmap - (repl[r.code] ? A[repl[r.code]].pmap : 0)));
+  if (closed && !light) { o.frozenCosts ||= { ...costs }; Object.assign(costs, o.frozenCosts); } // PRV figé à la clôture
+  const total = Object.values(costs).reduce((s,v)=>s+v,0), unit = total/N;
+  // Ancienne méthode PMI : dernier prix d'achat, ligne à 1 opérateur, ni réglage, ni emballage, ni lancement, ni transport, + 15 % FG.
+  const oldBase = matOld + runCost1op, old = oldBase*1.15;
+  const bridge = [
+    ["Ancien prix de revient PMI", old, "start"],
+    ["Retrait du forfait FG 15 %", -(oldBase*0.15), "c5"],
+    ["Matière au PMAP au lieu du dernier prix", matNew - matOld, ""],
+    ["Emballages et consommables (nomenclature)", costs["Consommables"] + costs["Emballage"], ""],
+    ["Ligne valorisée au nombre réel d'opérateurs", runCost - runCost1op, "c6"],
+    ["Temps de mise en route", setupCost, "c7"],
+    ["Lancement réel (ADV, programmation)", launch, ""],
+    ["Transport (champ transport utilisé)", transportStd, "c2"],
+    ["Prix de revient EOLIA", total, "end"],
+  ];
+  const k = { o, c, N, rows, needs, unitPrice, totalHT, tva, ttc, isEU, ofs, load, maxLoad, rate, pallets, transportStd, transportReal,
+    unitGross, gross, net, costs, total, unit, old, bridge, setupCost, customCost, closed, margin:(unitPrice-unit)/unitPrice };
+  if (light) return k;
+
+  // Besoins nets, délais et dates.
+  k.mrp = closed ? {} : mrp(o);
+  k.maxLead = Math.max(0, ...Object.values(k.mrp).map(r => r.st ? 0 : r.lead));
+  const prodQty = o.status==="EN_FAB" ? ral(o) : N;
+  k.prodDays = Math.ceil(maxLoad*prodQty/N/7) + 1;
+  k.dispo = closed ? null : addWorkdays(TODAY, k.maxLead + k.prodDays + A["ST-00007"].lead);
+  k.delivery = k.dispo && addWorkdays(k.dispo, c.transit);
+  k.late = !!k.delivery && k.delivery > D(o.wish);
+  return k;
+}
+function syncCredit(o){
+  if (!["A_LANCER","BLOQUEE"].includes(o.status)) return;
+  const k = compute(o, true), over = k.c.outstanding + k.ttc > k.c.limit;
+  if (over && !o.override) o.status = "BLOQUEE"; else if (o.status==="BLOQUEE") o.status = "A_LANCER";
+}
+// Mouvements de stock : refus si le stock est insuffisant (jamais de stock négatif).
+function issue(code, qty, ref){ const a = A[code];
+  if (qty > a.stock + 1e-9) return a.stock - qty;
+  a.hist.push({ date:iso(TODAY), type:"OUT", ref, qty }); replay(a); return 0; }
+function receive(code, qty, price, freight, ref){ const a = A[code], before = a.pmap, lot = "LOT26-" + pad(S.seq.lot++, 6);
+  a.hist.push({ date:iso(TODAY), type:"IN", lot, qty, price, freight, ref }); replay(a); return { before, after:a.pmap, lot }; }
+
+// ═══════════════════════════ Utilitaires d'affichage ═══════════════════════════
+const fr = (v,d=2) => Number(v).toLocaleString("fr-FR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const q  = v => Number(v).toLocaleString("fr-FR",{maximumFractionDigits:3});
+const eur = (v,d=2) => fr(v,d)+" €";
+const dt = d => d ? D(d).toLocaleDateString("fr-FR") : "—";
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const $ = id => document.getElementById(id);
+const act = () => S.orders[S.active];
+const fv = (id, def) => S.form[id] ?? def;
+function toast(msg, bad=false){ const t = $("toast"); t.textContent = msg; t.className = "toast" + (bad?" bad":""); t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 3800); }
+const STATUS = { A_LANCER:["À lancer","info"], BLOQUEE:["Bloquée (encours)","bad"], EN_FAB:["En fabrication","warn"], EXPEDIEE:["Expédiée","ok"], FACTUREE:["Facturée","mut"] };
+const st = o => `<span class="st ${STATUS[o.status][1]}">${STATUS[o.status][0]}</span>${delivered(o)>0 && ral(o)>0 ? ` <span class="st warn">Partiellement livrée</span>` : ""}`;
+
+// Validation : toute saisie invalide est signalée sous le champ, jamais corrigée en silence.
+function fieldError(el){
+  const d = el.type === "date", v = el.validity;
+  if (el.value === "") return v.badInput ? "Nombre invalide." : d ? "Date obligatoire." : "Saisissez un nombre.";
+  if (!d && Number(el.value) < 0) return "Valeur négative interdite.";
+  if (v.rangeUnderflow) return d ? `Date au plus tôt : ${dt(el.min)}.` : `Minimum : ${q(+el.min)}.`;
+  if (v.rangeOverflow) return d ? `Date au plus tard : ${dt(el.max)}.` : `Maximum : ${q(+el.max)}.`;
+  if (v.stepMismatch) return (+el.step||1) === 1 ? "Nombre entier attendu." : `Par pas de ${q(+el.step)}.`;
+  return "";
+}
+function showErr(el, msg){ const id = el.id + "-err"; $(id)?.remove();
+  if (!msg){ el.removeAttribute("aria-invalid"); el.removeAttribute("aria-describedby"); return true; }
+  el.setAttribute("aria-invalid","true"); el.setAttribute("aria-describedby", id);
+  el.insertAdjacentHTML("afterend", `<p id="${id}" class="err" role="alert">${msg}</p>`); return false; }
+const check = el => showErr(el, fieldError(el));
+const checkAll = els => { const ok = els.map(check).every(Boolean); if (!ok) els.find(e => e.getAttribute("aria-invalid")==="true")?.focus(); return ok; };
+
+const C128 = "212222 222122 222221 121223 121322 131222 122213 122312 132212 221213 221312 231212 112232 122132 122231 113222 123122 123221 223211 221132 221231 213212 223112 312131 311222 321122 321221 312212 322112 322211 212123 212321 232121 111323 131123 131321 112313 132113 132311 211313 231113 231311 112133 112331 132131 113123 113321 133121 313121 211331 231131 213113 213311 213131 311123 311321 331121 312113 312311 332111 314111 221411 431111 111224 111422 121124 121421 141122 141221 112214 112412 122114 122411 142112 142211 241211 221114 413111 241112 134111 111242 121142 121241 114212 124112 124211 411212 421112 421211 212141 214121 412121 111143 111341 131141 114113 114311 411113 411311 113141 114131 311141 411131 211412 211214 211232 2331112".split(" ");
+function barcode(text){ // Code 128 jeu B
+  const codes = [104, ...[...text].map(ch => ch.charCodeAt(0)-32)];
+  codes.push(codes.reduce((s,v,i) => s + v*(i||1), 0) % 103, 106);
+  let x = 10, r = "";
+  for (const v of codes) [...C128[v]].forEach((w,i) => { if(!(i%2)) r += `<rect x="${x}" width="${w}" height="40"/>`; x += +w; });
+  return `<svg viewBox="0 0 ${x+10} 40" preserveAspectRatio="none" role="img" aria-label="Code-barre ${esc(text)}" fill="currentColor">${r}</svg>`;
+}
+
+// ═══════════════════════════ Actions critiques 80/20 ═══════════════════════════
+const CRIT = [
+  { id:1, pb:"1 client = 1 article : un code gestion par client pour le même article", page:"articles", gain:18,
+    action:"1. Lier les réf. externes des clients vers une seule réf. interne qui regroupe les articles identiques. 2. Une nomenclature par client.",
+    how:"Les 3 réf. clients pointent vers PF-00128 ; les anciens codes PMI sont archivés. Chaque client a sa nomenclature : base standard + lignes de personnalisation." },
+  { id:2, pb:"Champ transport non utilisé dans l'ERP", page:"expedition", gain:26,
+    action:"Ce champ doit être utilisé.",
+    how:"Transporteur et tarif par zone sur chaque commande (le moins cher proposé). Coût standard intégré au prix de revient, coût réel calculé au BL, poids et palettes automatiques." },
+  { id:3, pb:"Pas d'allocation de stock matière et composants par client", page:"stocks", gain:15,
+    action:"Allouer tous les mois le stock sûr pour les clients récurrents (assurance de présence stock).",
+    how:"Allocation mensuelle par client récurrent, consommée en priorité par ses commandes et protégée des autres dans le calcul des besoins." },
+  { id:4, pb:"Gestion par sous-ensemble (S/E)", page:"nomenclature", gain:14,
+    action:"Gamme de PF avec tous les CPT nécessaires regroupés au S/E. Standardisation de la base de sous-ensembles, puis ajout de la personnalisation client.",
+    how:"Nomenclature PF > S/E > MP/CPT, composants rattachés à leur S/E. L'OF du PF lance les OF de ses S/E. Personnalisation client en surcouche de la base standard." },
+  { id:5, pb:"Frais généraux 15 % (à supprimer)", page:"prix", gain:38,
+    action:"Supprimer.",
+    how:"Le forfait disparaît. Les coûts réels le remplacent : emballage, transport, réglage, lancement administratif." },
+  { id:6, pb:"Valorisation de la ligne en f(x) du nombre d'opérateurs", page:"nomenclature", gain:12,
+    action:"Mettre un prix sur la ligne de gamme. Coût pièce + nb opérateurs × temps passé = prix de revient de la tâche de fabrication de la pièce.",
+    how:"Chaque ligne de gamme a son prix : coût machine + nb opérateurs × temps passé × taux MO. Nombre d'opérateurs modifiable." },
+  { id:7, pb:"Écart sur la valorisation lié au temps de mise en route", page:"atelier", gain:21,
+    action:"Mise en route de la gamme de fabrication trop longue. Piste : la transition de l'entrepôt vers le démarrage est trop longue. Pendant la phase de fabrication, le temps est bon.",
+    how:"Le pointage sépare attente matière et réglage. Il montre que la production colle à la gamme. Écart valorisé, gamme recalable, gain du kit matière en bord de ligne chiffré." },
+];
+const OTHERS = [ // les 30 autres problèmes du fichier « Blocs fonctionnels – FLUX » (criticité d'origine)
+  [1,"Transport suivi hors de l'ERP ; poids des articles nécessaire pour la DEB"],[1,"Code C/C détourné (couleur et n° de plan dans le même champ)"],[1,"Pas de gestion des unités ni de conversion"],
+  [1,"Frais généraux non pris en compte dans la nomenclature"],[1,"Pas de réf. externe client sur les étiquettes"],[1,"Pas d'articles de remplacement"],
+  [1,"Traçabilité non gérée hors entrée en stock"],[1,"Prévisions de vente et codes ABC non utilisés"],[1,"Pas de codes-barres sur les produits"],
+  [1,"Devis non saisis dans l'ERP"],[1,"Bons de préparation non gérés"],[1,"Factures transmises mensuellement à la main"],
+  [1,"Fournisseurs codifiés manuellement"],[1,"Demandes de prix non gérées"],["—","Code gestion qui dérive de la Fab vers l'Achat"],
+  [2,"Articles inutilisés / consommables non suivis"],[2,"Fournitures industrielles non gérées (étiquettes, huiles, cartons)"],[2,"Pas de tranches de production"],
+  [2,"Pas de comptabilité analytique par sous-composant"],[2,"Conditionnements renseignés jamais utilisés"],[2,"Dépôt et emplacements incohérents (5S)"],
+  [2,"Quantité économique non utilisée"],[2,"Forte volatilité des prix (passage au PMAP)"],[2,"Valorisation au poste plutôt qu'à la machine"],
+  [3,"Tarif 2 incompris"],[3,"Champ promotion inutile"],[3,"Sous-familles non pertinentes"],[3,"Code statistique non utilisé"],[3,"Champs personnalisés non utilisés"],
+  [3,"Contacts fournisseurs absents de la table des contacts"],
+];
+const OTHERS_GAIN = 36; // k€/an cumulés, estimation fictive
+const critBadges = ids => `<div class="crits">${ids.map(i => `<a class="critb" href="#/plan" title="${esc(CRIT[i-1].pb)}">Action critique n° ${i}</a>`).join("")}</div>`;
+
+// ═══════════════════════════ Glossaire (source unique du PDF) ═══════════════════════════
+const GLOSS = [
+  ["Organisation",[
+    ["ERP","Enterprise Resource Planning","Progiciel de gestion intégré : un référentiel unique pour ventes, achats, stocks, production et comptabilité."],
+    ["PMI","Petites et moyennes industries","Nom de l'ancien ERP (Manufacturing PMI) que remplace EOLIA ERP."],
+    ["PME","Petite et moyenne entreprise","Catégorie d'entreprise d'EOLIA (environ 35 salariés)."],
+    ["ADV","Administration des ventes","Saisit devis et commandes clients, émet les A/R et suit les livraisons."],
+    ["BE","Bureau d'études","Conçoit les pièces sous SolidWorks et fournit plans et nomenclatures."],
+    ["DAF","Direction administrative et financière","Valide notamment les dépassements d'encours client."],
+    ["GMAO","Gestion de la maintenance assistée par ordinateur","Suivi du parc machines et des interventions."],
+    ["MDM","Master Data Management","Gestion des données de référence : articles, nomenclatures, gammes, tiers."],
+    ["80/20","Loi de Pareto","20 % des actions apportent 80 % des gains : base de la priorisation du projet."],
+  ]],
+  ["Articles et nomenclatures",[
+    ["PF","Produit fini","Article vendu au client (ex. PF-00128, coffret électrique)."],
+    ["S/E ou SE","Sous-ensemble","Article fabriqué qui entre dans un PF (caisson soudé, porte équipée)."],
+    ["MP","Matière première","Tôle, tube, fil… achetés et transformés."],
+    ["CPT","Composant","Pièce achetée montée telle quelle (charnière, serrure, goujon)."],
+    ["S/T ou ST","Sous-traitance","Opération confiée à un prestataire (thermolaquage, découpe)."],
+    ["CSO","Consommable","Fourniture consommée sans être transformée (étiquettes, plaques, notices)."],
+    ["EMB","Emballage","Carton, mousse, palette perdue : intégrés à la nomenclature."],
+    ["Nomenclature","Bill of Materials (BOM)","Liste des composants et quantités nécessaires pour fabriquer un article."],
+    ["Nomenclature client","Base standard + personnalisation","Nomenclature standard du PF complétée ou modifiée par les exigences d'un client (plaque gravée, joint IP65, notice)."],
+    ["Gamme","Routing","Suite des opérations de fabrication avec machines, temps et nombre d'opérateurs ; chaque ligne porte un prix."],
+    ["Indice","Indice de plan","Révision du plan SolidWorks, stockée séparément du numéro de plan."],
+    ["Code C/C","Champ de la fiche article PMI","Détourné dans PMI pour la couleur et le n° de plan ; remplacé par les champs Plan / indice."],
+    ["PDM","Product Data Management","Gestion des données techniques CAO (source des poids et plans)."],
+    ["CAO","Conception assistée par ordinateur","Logiciel de conception (SolidWorks), source des nomenclatures importées en XML/CSV."],
+  ]],
+  ["Unités",[
+    ["PCE","Pièce","Unité de comptage."],["C100","Cent pièces","Unité de prix « aux 100 pièces » (tarifs clients)."],
+    ["KG / T","Kilogramme / tonne","Unités de masse, conversion générique 1 T = 1 000 KG."],
+    ["M / M2","Mètre / mètre carré","Unités de longueur et de surface (1 M2 de tôle 1,5 mm = 11,775 KG)."],
+    ["FMT","Format","Unité d'achat de la tôle : format 3000×1500."],["BTE / PAQ / SAC / RLX","Boîte, paquet, sac, rouleau","Unités d'achat converties vers l'unité de stock."],
+  ]],
+  ["Stocks et achats",[
+    ["PMAP","Prix moyen d'achat pondéré","Valorisation du stock recalculée à chaque entrée (prix d'achat + fret) ; les sorties sont valorisées au PMAP du moment sans le modifier. Lisse la volatilité des prix."],
+    ["DPA","Dernier prix d'achat","Ancienne valorisation PMI, sensible au dernier achat."],
+    ["PMRP","Prix moyen de revient pondéré","Équivalent du PMAP pour les articles fabriqués."],
+    ["FIFO","First In, First Out","Premier entré, premier sorti : règle de sortie physique des lots."],
+    ["Lot","Numéro de lot","Identifie une entrée en stock (LOT26-xxxxxx) pour la traçabilité et le FIFO."],
+    ["ABC","Classement de Pareto des articles","A = 80 % de la valeur du stock, B = 15 %, C = 5 % ; pilote la fréquence de l'inventaire tournant."],
+    ["Inventaire tournant","Comptage par roulement","Comparaison quantité théorique / quantité scannée, écart valorisé au PMAP puis ajusté."],
+    ["CBN","Calcul des besoins nets","Besoins bruts − stock disponible − commandes fournisseurs en cours, en reconstituant le stock de sécurité ; base des suggestions d'achat."],
+    ["MRP","Material Requirements Planning","Planification des besoins matière ; jugé trop lourd dans PMI."],
+    ["Allocation","Réservation de stock par client","Quantité protégée chaque mois pour un client récurrent."],
+    ["DP","Demande de prix","Consultation de plusieurs fournisseurs avant commande ; l'offre retenue est tracée."],
+    ["CF","Commande fournisseur","Commande d'achat, rattachée à la commande client qui l'a déclenchée."],
+    ["Reliquat","Reste à recevoir","Quantité commandée au fournisseur et pas encore réceptionnée."],
+    ["EAN-13 / GTIN","European Article Number / Global Trade Item Number","Codes-barres normalisés des articles du commerce."],
+    ["Code 128","Symbologie de code-barre","Utilisée par EOLIA pour les badges, OF, lots, emplacements et n° de série."],
+  ]],
+  ["Ventes, logistique et production",[
+    ["DV","Devis","Offre chiffrée à partir du prix de revient, transformable en commande (ex. DV26-00088)."],
+    ["CC","Commande client","Commande saisie par l'ADV (ex. CC26-00612) ; à ne pas confondre avec le code C/C de la fiche article PMI."],
+    ["A/R ou ARC","Accusé de réception de commande","Confirme au client la prise en compte, le délai et le prix."],
+    ["RAL","Reste à livrer","Quantité commandée pas encore livrée (commandée − somme des BL) ; valorisée, elle forme le carnet de commandes."],
+    ["BP","Bon de préparation","Liste de prélèvement magasin par destination (découpe, soudure, montage, conditionnement)."],
+    ["BL","Bon de livraison","Document qui accompagne une expédition (totale ou partielle), puis transformé en facture."],
+    ["FA","Facture","Pièce comptable de vente, une par BL (ex. FA26-01185)."],
+    ["OF","Ordre de fabrication","Lancement en production d'une quantité d'un article, avec code-barre."],
+    ["NC","Non-conformité","Ticket qualité déclaré depuis l'OF, avec coût calculé et OF de retouche éventuel."],
+    ["SN","Serial Number","Numéro de série unique imprimé sur la plaque produit."],
+    ["MO","Main-d'œuvre","Coût horaire des opérateurs (36 €/h dans la démo)."],
+    ["FG","Frais généraux","Ancien forfait de 15 % ajouté au prix de revient, supprimé au profit des coûts réels."],
+    ["PRV","Prix de revient","Matière, opérations, réglages, lancement, emballage, transport ; hors frais de structure (direction, locaux)."],
+    ["Tranche de production","Plage de quantité","PRV calculé par plage de quantité, avec un prix plancher pour la marge cible."],
+    ["Marge","Taux de marque","(Prix de vente − PRV) ÷ prix de vente."],
+    ["Kit bord de ligne","Matière préparée au poste","Matière préparée par le magasin avant le démarrage, pour supprimer l'attente pendant la mise en route."],
+    ["SMED","Single Minute Exchange of Die","Méthode de réduction des temps de changement de série (mise en route)."],
+    ["5S","Méthode d'organisation (trier, ranger, nettoyer, standardiser, maintenir)","Fiabilise les emplacements de stock."],
+    ["Kanban","Tableau visuel","Planning simple des OF par machine, par glisser-déposer."],
+    ["En-cours de production","Travaux en cours","OF lancés non soldés : matière sortie + temps pointés valorisés."],
+    ["EDI","Échange de données informatisé","Transmission automatique de commandes et factures."],
+  ]],
+  ["Commerce international et comptabilité",[
+    ["Incoterm","International Commercial Terms","Règles de répartition du transport et des risques entre vendeur et acheteur."],
+    ["EXW","Ex Works","Marchandise à disposition chez EOLIA, transport à la charge du client."],
+    ["DAP","Delivered At Place","Livré au lieu convenu, transport payé par EOLIA, droits à la charge du client."],
+    ["DDP","Delivered Duty Paid","Livré droits acquittés : EOLIA paie transport et droits."],
+    ["DEB","Déclaration d'échanges de biens","Remplacée depuis 2022 par l'EMEBI (volet statistique) et l'état récapitulatif TVA (volet fiscal)."],
+    ["EMEBI","Enquête mensuelle statistique sur les échanges de biens intra-UE","Déclaration statistique : code NC8, poids net, valeur, pays."],
+    ["État récapitulatif TVA","Déclaration fiscale des livraisons intra-UE","Liste mensuelle des clients UE (n° de TVA, montant) ; une des conditions de l'exonération de TVA."],
+    ["NC (douane)","Nomenclature combinée","Code douanier à 8 chiffres de l'article (ex. 8538 10 00)."],
+    ["TVA","Taxe sur la valeur ajoutée","20 % en France ; exonérée sur une livraison intracommunautaire justifiée."],
+    ["CGI","Code général des impôts","Art. 262 ter I : exonération de TVA des livraisons intracommunautaires."],
+    ["PCG","Plan comptable général","701 = ventes de produits finis, 445710 = TVA collectée, 411 = clients."],
+    ["HT / TTC","Hors taxes / toutes taxes comprises","Montants avant et après TVA."],
+    ["FEC","Fichier des écritures comptables","Format normalisé d'export des écritures, dont l'export journal reprend les principales colonnes."],
+    ["SIRET / NAF","Identifiant d'établissement / code d'activité","Données légales de la fiche client."],
+    ["Encours client","Crédit client","Montant dû par le client, comparé à son plafond autorisé."],
+  ]],
+];
+
+// ═══════════════════════════ Pages ═══════════════════════════
+const PAGES = [
+  ["Pilotage", "accueil", "Tableau de bord"],
+  ["Ventes", "devis", "Devis"],
+  ["Ventes", "commandes", "Commandes clients"],
+  ["Données techniques", "articles", "Articles et réf. clients"],
+  ["Données techniques", "nomenclature", "Nomenclature et gamme"],
+  ["Stocks et achats", "stocks", "Stocks et inventaire"],
+  ["Stocks et achats", "achats", "Achats"],
+  ["Production", "production", "OF, qualité, planning"],
+  ["Production", "atelier", "Pointages atelier"],
+  ["Logistique", "expedition", "Préparation et livraison"],
+  ["Gestion", "prix", "Prix de revient"],
+  ["Gestion", "compta", "Facturation et comptabilité"],
+  ["Projet", "plan", "Plan d'actions 80/20"],
+  ["Projet", "glossaire", "Acronymes"],
+];
+const pageHead = (title, sub, crits=[]) => `<div class="ph"><h1>${title}</h1>${sub?`<p>${sub}</p>`:""}${crits.length?critBadges(crits):""}</div>`;
+const numInput = (id, val, attrs, label) => `<input id="${id}" type="number" value="${esc(val)}" ${attrs} ${label?`aria-label="${esc(label)}"`:""}>`;
+function loadBars(load){ const max = Math.max(1, ...Object.values(load));
+  return Object.entries(load).map(([m,h]) => `<div class="loadrow"><span class="mono">${m}</span><div class="bar" aria-hidden="true"><span style="width:${h/max*100}%"></span></div><span class="n">${fr(h,1)} h</span></div>`).join(""); }
+const invHT = inv => Math.round(inv.qty*inv.price*100)/100;
+const orderOf = no => S.orders.find(o => o.no === no);
+
+const R = {};
+
+R.accueil = () => {
+  const all = S.orders.map(o => ({ o, k:compute(o) }));
+  const open = all.filter(x => OPEN.includes(x.o.status));
+  const carnet = open.reduce((s,x)=>s+ral(x.o)*x.k.unitPrice,0);
+  const late = open.filter(x => x.k.late).length;
+  const wip = S.orders.filter(o=>o.status==="EN_FAB").reduce((s,o)=>s+wipValue(o),0);
+  const toInvoice = S.orders.flatMap(o=>o.bls.filter(b=>!b.inv)).length, toExport = S.invoices.filter(i=>!i.exported).length;
+  const k = compute(act());
+  return pageHead("Tableau de bord EOLIA", "Remplace les états imprimés : vues dynamiques sur le carnet, la charge, l'en-cours et les documents à traiter. Cliquez une commande pour l'activer : toutes les pages suivent.") + `
+  <div class="kpis">
+    <div class="kpi"><div class="l">Carnet ouvert (RAL) HT</div><div class="v">${eur(carnet,0)}</div><div class="d">${open.reduce((s,x)=>s+ral(x.o),0)} coffrets à livrer</div></div>
+    <div class="kpi"><div class="l">En-cours de production</div><div class="v">${eur(wip,0)}</div><div class="d">matière sortie + temps pointés</div></div>
+    <div class="kpi"><div class="l">Retards prévisionnels</div><div class="v" style="color:var(--${late?"bad":"ok"})">${late}</div><div class="d">livraison prévue &gt; date souhaitée</div></div>
+    <div class="kpi"><div class="l">Bloquées (encours client)</div><div class="v">${S.orders.filter(o=>o.status==="BLOQUEE").length}</div><div class="d">validation DAF requise</div></div>
+    <div class="kpi"><div class="l">À traiter en compta</div><div class="v">${toInvoice} BL · ${toExport} FA</div><div class="d"><a href="#/compta">BL à facturer · factures à exporter</a></div></div>
+  </div>
+  <div class="card mt"><h2>Commandes clients</h2><div class="scroll"><table>
+    <thead><tr><th>N°</th><th>Client</th><th>Réf. client → interne</th><th class="n">Qté</th><th class="n">Livré</th><th class="n">RAL</th><th class="n">Montant HT</th><th>Souhaitée</th><th>Livraison prévue</th><th class="n">Marge</th><th>Statut</th></tr></thead><tbody>
+    ${all.map(({o,k},i)=>`<tr class="click ${i===S.active?"sel":""}" data-act="activate" data-i="${i}" tabindex="0"><td class="mono">${o.no}</td><td>${esc(k.c.name)}</td><td class="mono small">${esc(k.c.ref)} → ${INTERNAL}</td><td class="n">${o.qty}</td><td class="n">${delivered(o)}</td><td class="n"><b>${ral(o)}</b></td><td class="n">${eur(k.totalHT,0)}</td><td>${dt(o.wish)}</td><td>${k.delivery?`<span class="st ${k.late?"bad":"ok"}">${dt(k.delivery)}</span>`:"—"}</td><td class="n">${fr(k.margin*100,1)} %</td><td>${st(o)}</td></tr>`).join("")}
+  </tbody></table></div></div>
+  <div class="g2 mt">
+    <div class="card"><h2>Charge générée par le carnet ouvert</h2>${loadBars(open.reduce((acc,x)=>{ const f = x.o.status==="EN_FAB" ? ral(x.o)/x.k.N : 1; Object.entries(x.k.load).forEach(([m,h])=>acc[m]=(acc[m]||0)+h*f); return acc; },{}))}<p class="small muted">Heures machine (réglage + production) restant à faire sur les commandes ouvertes.</p></div>
+    <div class="card"><h2>Les 7 actions critiques (20 % → 80 %)</h2><ol style="margin:0;padding-left:20px">${CRIT.map(c=>`<li style="margin:4px 0"><a href="#/${c.page}">${esc(c.pb)}</a></li>`).join("")}</ol></div>
+  </div>`;
+};
+function wipValue(o){ // matière sortie au PMAP + temps pointés valorisés au taux de ligne
+  const k = compute(o, true), lines = Object.fromEntries(k.ofs.flatMap(of=>of.lines.map(l=>[l.code,l])));
+  const mat = Object.keys(o.picked).reduce((s,c)=>s+(k.needs[c]||0)*A[c].pmap,0);
+  const time = S.pointages.filter(p=>lines[p.op]).reduce((s,p)=>s+p.min/60*lineRate(lines[p.op].op),0);
+  return (mat + time) * ral(o) / k.N; // part non encore livrée
+}
+
+R.devis = () => {
+  const ci = +fv("q-client", 0), qty = +fv("q-qty", 30), m = +fv("q-margin", TARGET_MARGIN*100)/100, wish = fv("q-wish", wd(15));
+  const valid = qty >= 1 && qty <= 2000 && Number.isInteger(qty) && m >= 0 && m < 0.9;
+  const c = CLIENTS[ci];
+  let preview = `<div class="alert warn mt">Corrigez la saisie pour obtenir le chiffrage.</div>`;
+  if (valid){
+    const v = { no:"(devis)", client:ci, qty, wish, status:"A_LANCER", of:0, bls:[], picked:{}, carrier:cheapest(c.zone), useRepl:false, machines:{} };
+    const k = compute(v), tariff = c.price100/100, floor = Math.ceil(k.unit/(1-m)*10)/10, price = Math.max(tariff, floor);
+    preview = `<dl class="kv mt"><dt>PRV / pce (nomenclature ${esc(c.name)}, transport zone ${c.zone})</dt><dd>${eur(k.unit)}</dd>
+      <dt>Tarif client négocié</dt><dd>${eur(tariff)} · marge ${fr((tariff-k.unit)/tariff*100,1)} %</dd>
+      <dt>Prix plancher pour ${fr(m*100,1)} % de marge</dt><dd>${eur(floor)}</dd>
+      <dt>Prix proposé</dt><dd style="color:var(--accent)">${eur(price)} / pce · ${eur(price*qty,0)} HT</dd>
+      <dt>Mise à dispo calculée</dt><dd>${dt(k.dispo)}</dd><dt>Livraison promise (acheminement ${c.transit} j)</dt><dd><span class="st ${k.delivery>D(wish)?"bad":"ok"}">${dt(k.delivery)}</span></dd></dl>
+      ${price>tariff?`<div class="alert warn mt">Petite série : le tarif client ne couvre pas la marge cible. Le devis applique le prix plancher calculé pour cette quantité.</div>`:""}`;
+    S.quotePreview = { client:ci, qty, wish, price, target:m, prv:k.unit };
+  } else S.quotePreview = null;
+  return pageHead("Devis", "Chiffrage à partir de la nomenclature du client et de la gamme : prix de revient, prix plancher pour la marge cible, délai promis. Le devis accepté devient une commande sans ressaisie.", [1]) + `
+  <div class="g2">
+    <div class="card"><h2>Nouveau devis</h2>
+      <label for="q-client">Client</label><select id="q-client" data-form data-live>${CLIENTS.map((x,i)=>`<option value="${i}" ${i===ci?"selected":""}>${x.code} · ${esc(x.name)} — réf. ${esc(x.ref)}</option>`).join("")}</select>
+      <div class="row"><div><label for="q-qty">Quantité</label>${numInput("q-qty", fv("q-qty",30), 'min="1" max="2000" step="1" data-form data-live')}</div>
+      <div><label for="q-margin">Marge cible (%)</label>${numInput("q-margin", fv("q-margin",TARGET_MARGIN*100), 'min="0" max="60" step="0.5" data-form data-live')}</div>
+      <div><label for="q-wish">Livraison souhaitée</label><input id="q-wish" type="date" value="${wish}" min="${wd(0)}" max="${wd(260)}" data-form data-live></div></div>
+      ${preview}
+      <p style="margin:14px 0 0"><button class="primary" type="button" data-act="quoteSave" ${valid?"":"disabled"}>Enregistrer le devis</button></p></div>
+    <div class="card"><h2>Devis émis</h2><div class="scroll"><table><thead><tr><th>N°</th><th>Client</th><th class="n">Qté</th><th class="n">Prix</th><th>Validité</th><th>Statut</th><th></th></tr></thead><tbody>
+      ${S.quotes.slice().reverse().map(d=>`<tr><td class="mono">${d.no}</td><td>${esc(CLIENTS[d.client].name)}</td><td class="n">${d.qty}</td><td class="n">${eur(d.price)}</td><td>${dt(d.valid||addWorkdays(d.date,22))}</td>
+        <td>${d.status==="ACCEPTE"?`<span class="st ok">Accepté → ${d.order}</span>`:d.status==="PERDU"?`<span class="st mut">Perdu (${esc(d.reason)})</span>`:`<span class="st info">Envoyé</span>`}</td>
+        <td>${d.status==="ENVOYE"?`<button class="sm" type="button" data-act="quoteToOrder" data-no="${d.no}">Transformer en commande</button>`:""}</td></tr>`).join("")}
+      </tbody></table></div></div>
+  </div>`;
+};
+
+R.commandes = () => {
+  const o = act(), k = compute(o), c = k.c, locked = LOCKED.includes(o.status);
+  const over = c.outstanding + k.ttc > c.limit;
+  const quote = o.quote && S.quotes.find(d=>d.no===o.quote);
+  return pageHead("Commandes clients", "Vue ADV. La commande arrive avec la référence du client ; l'ERP la traduit en réf. interne, contrôle l'encours, calcule la livraison prévue, suit le reste à livrer et lance la fabrication.", [1]) + `
+  <div class="g2">
+    <div class="card"><h2>Commande ${o.no} ${st(o)}</h2>
+      <dl class="kv"><dt>Client</dt><dd>${c.code} · ${esc(c.name)}</dd><dt>Adresse</dt><dd>${esc(c.city)}</dd><dt>Incoterm</dt><dd>${c.incoterm}</dd><dt>Reçue le</dt><dd>${dt(o.received)}</dd>${quote?`<dt>Issue du devis</dt><dd class="mono">${quote.no}</dd>`:""}</dl>
+      <div class="alert info mt"><b>Réf. client reconnue</b><br><span class="mono">${esc(c.ref)} ind. ${esc(c.index)}</span> → <span class="mono"><b>${INTERNAL}</b> ind. ${A[INTERNAL].index}</span><br><span class="small">${esc(A[INTERNAL].label)} · nomenclature client : ${esc(CUSTOM[c.code].label)}</span></div>
+      <div class="row"><div><label for="f-qty">Quantité</label>${numInput("f-qty", o.qty, `min="${Math.max(1,delivered(o))}" max="2000" step="1" data-bind="qty" ${locked?"disabled":""}`)}</div>
+      <div><label for="f-wish">Livraison souhaitée</label><input id="f-wish" type="date" value="${o.wish}" min="${wd(0)}" max="${wd(260)}" data-bind="wish" ${locked?"disabled":""}></div></div>
+      ${locked?`<p class="small muted">Commande ${STATUS[o.status][0].toLowerCase()} : quantité et date verrouillées.</p>`:""}
+      <dl class="kv mt"><dt>Prix de vente</dt><dd>${eur(k.unitPrice)} / pce ${o.price!=null?"(prix du devis)":`(tarif client ${fr(c.price100,0)} €/C100)`}</dd><dt>Total HT</dt><dd>${eur(k.totalHT)}</dd><dt>${k.isEU?"TVA (livraison intracom.)":"TVA 20 %"}</dt><dd>${eur(k.tva)}</dd><dt>Total TTC</dt><dd>${eur(k.ttc)}</dd>
+        <dt>Livré / reste à livrer (RAL)</dt><dd>${delivered(o)} / <b>${ral(o)}</b> pce</dd>${o.bls.length?`<dt>Dernier BL</dt><dd>${o.bls.at(-1).no} du ${dt(o.bls.at(-1).date)}</dd>`:""}</dl>
+      ${["A_LANCER","BLOQUEE"].includes(o.status)?`<div class="mt">${over && !o.override
+        ? `<div class="alert bad" role="alert"><b>Encours dépassé :</b> ${eur(c.outstanding,0)} + ${eur(k.ttc,0)} &gt; plafond ${eur(c.limit,0)}. La commande ne peut pas être lancée.<br><button type="button" data-act="override" style="margin-top:8px">Valider exceptionnellement (DAF)</button></div>`
+        : `<div class="alert ${over?"warn":"ok"}">${over?"Dépassement d'encours validé par la DAF.":`Encours OK : ${eur(c.outstanding+k.ttc,0)} / ${eur(c.limit,0)}`}</div>`}</div>`:""}
+      ${k.dispo?`<div class="alert ${k.late?"bad":"ok"} mt"><b>Livraison prévue : ${dt(k.delivery)}</b> (mise à dispo ${dt(k.dispo)} : appro ${k.maxLead} j + fabrication ${k.prodDays} j + thermolaquage ${A["ST-00007"].lead} j, puis acheminement ${c.transit} j). ${k.late?"L'A/R proposera cette date au client.":"Compatible avec la date souhaitée."}</div>`:`<div class="alert ok mt">Commande ${STATUS[o.status][0].toLowerCase()} : plus de besoin matière ni de date à calculer.</div>`}
+      ${k.margin<TARGET_MARGIN?`<div class="alert warn mt">Marge ${fr(k.margin*100,1)} % sous la cible de ${TARGET_MARGIN*100} % : petite série, voir les <a href="#/prix">tranches de production</a>.</div>`:""}
+      ${o.status==="A_LANCER"?`<p style="margin:14px 0 0"><button class="primary" type="button" data-act="launch">Lancer en fabrication (OF ${ofNo(o.of)} + 2 OF de S/E)</button></p>`:""}
+    </div>
+    <div class="card"><h2>Commande directe (sans devis)</h2>
+      <p class="small muted" style="margin:0">Le client envoie sa propre référence ; plus besoin de créer un article par client.</p>
+      <label for="n-client">Client</label><select id="n-client" data-form>${CLIENTS.map((x,i)=>`<option value="${i}" ${+fv("n-client",0)===i?"selected":""}>${x.code} · ${esc(x.name)} — réf. ${esc(x.ref)}</option>`).join("")}</select>
+      <div class="row"><div><label for="n-qty">Quantité</label>${numInput("n-qty", fv("n-qty",50), 'min="1" max="2000" step="1" data-form')}</div>
+      <div><label for="n-wish">Livraison souhaitée</label><input id="n-wish" type="date" value="${fv("n-wish",wd(15))}" min="${wd(0)}" max="${wd(260)}" data-form></div></div>
+      <p style="margin:14px 0 0"><button class="primary" type="button" data-act="newOrder">Créer la commande et l'activer</button></p>
+      <h3>Livraisons de la commande ${o.no}</h3>
+      ${o.bls.length?`<table><thead><tr><th>BL</th><th>Date</th><th class="n">Qté</th><th>Facture</th></tr></thead><tbody>${o.bls.map(b=>`<tr><td class="mono">${b.no}</td><td>${dt(b.date)}</td><td class="n">${b.qty}</td><td class="mono">${b.inv||'<span class="st warn">À facturer</span>'}</td></tr>`).join("")}</tbody></table>`:`<p class="small muted">Aucun BL pour l'instant. Les livraisons se font depuis <a href="#/expedition">Préparation et livraison</a>.</p>`}
+    </div>
+  </div>`;
+};
+
+R.articles = () => {
+  const list = Object.entries(A).filter(([code,a]) => (S.showArchived || !a.archived) && (!S.artType || a.type===S.artType) && (code+" "+a.label).toLowerCase().includes(S.artFilter.toLowerCase()));
+  const code = S.article, a = A[code], used = whereUsed(code), o = act();
+  const prvs = CLIENTS.map((c,i) => compute({ ...o, client:i, carrier:cheapest(c.zone), price:undefined }, true));
+  const suppliers = allSuppliers();
+  return pageHead("Articles et réf. clients", "Référentiel unique : code généré automatiquement, poids obligatoire, unités de stock et d'achat avec conversions. Les articles inactifs sont archivés, jamais supprimés.", [1]) + `
+  <div class="card"><h2>Action critique n° 1 : trois clients, une réf. interne, une nomenclature par client</h2>
+    <div class="scroll"><table><thead><tr><th>Client</th><th>Ancien code PMI</th><th class="n">Ancien PRV (fiche de l'ancien code)</th><th>Réf. client (conservée)</th><th>Réf. interne</th><th>Personnalisation (nomenclature client)</th><th class="n">PRV EOLIA</th></tr></thead><tbody>
+    ${CLIENTS.map((c,i)=>`<tr><td>${esc(c.name)}</td><td class="mono"><s>${c.legacy}</s> <span class="st mut">archivé</span></td><td class="n">${eur(c.legacyCost)}</td><td class="mono">${esc(c.ref)} ind. ${esc(c.index)}</td><td class="mono"><b>${INTERNAL}</b></td><td><span class="cust">Client</span> ${esc(CUSTOM[c.code].label)}</td><td class="n">${eur(prvs[i].unit)}</td></tr>`).join("")}
+    </tbody></table></div>
+    <p class="small muted" style="margin:8px 0 0">PRV EOLIA calculé pour ${o.qty} pièces avec la nomenclature et la zone de transport de chaque client. Les 3 anciens coûts divergeaient pour une même pièce. Désormais : un plan, un indice, une base standard, et l'écart entre clients s'explique ligne par ligne.</p>
+  </div>
+  <div class="g2 mt">
+    <div class="card"><h2>Liste des articles</h2>
+      <div class="row"><div><label for="a-q">Rechercher</label><input id="a-q" type="search" value="${esc(S.artFilter)}" data-bind="artFilter" placeholder="code ou désignation"></div>
+      <div><label for="a-t">Type</label><select id="a-t" data-bind="artType"><option value="">Tous</option>${[...new Set(Object.values(A).map(x=>x.type))].map(t=>`<option ${S.artType===t?"selected":""}>${t}</option>`).join("")}</select></div></div>
+      <label class="check"><input type="checkbox" data-bind="showArchived" ${S.showArchived?"checked":""}> Afficher les articles archivés</label>
+      <div class="scroll" style="margin-top:10px"><table><thead><tr><th>Code</th><th>Désignation</th><th>Type</th><th>U.</th><th class="n">Poids</th></tr></thead><tbody>
+      ${list.map(([cd,x])=>`<tr class="click ${cd===code?"sel":""} ${x.archived?"arch":""}" data-act="article" data-code="${cd}" tabindex="0"><td class="mono">${cd}</td><td>${esc(x.label)}${x.archived?' <span class="st mut">archivé</span>':""}</td><td><span class="type ${x.type}">${x.type.replace("_"," ")}</span></td><td>${x.unit}</td><td class="n">${x.weight!=null?q(x.weight)+" kg":"—"}</td></tr>`).join("")}
+      </tbody></table></div></div>
+    <div class="card"><h2>Fiche ${code}</h2>
+      <dl class="kv">
+        <dt>Désignation</dt><dd>${esc(a.label)}</dd><dt>Type</dt><dd><span class="type ${a.type}">${a.type}</span></dd>
+        ${a.drawing?`<dt>Plan / indice</dt><dd class="mono">${a.drawing} · ind. ${a.index||"A"}</dd>`:""}
+        <dt>Unité de stock</dt><dd>${a.unit}</dd>
+        <dt>Poids / unité</dt><dd>${a.weight!=null?q(a.weight)+" kg":`<span class="st mut">Non stocké</span>`}</dd>
+        ${a.customs?`<dt>Code NC douane</dt><dd class="mono">${a.customs}</dd>`:""}
+        ${a.noStock?`<dt>Tarif S/T</dt><dd>${eur(a.pmap,2)} / ${a.unit}</dd>`:a.pmap!=null?`<dt>PMAP</dt><dd>${eur(a.pmap,4)} / ${a.unit}</dd><dt>Dernier prix d'achat</dt><dd>${eur(a.dpa,4)}</dd><dt>Stock / emplacement</dt><dd>${q(a.stock)} ${a.unit} · <span class="mono">${a.loc}</span></dd>`:""}
+        ${a.supplier?`<dt>Fournisseur</dt><dd>${esc(a.supplier)}</dd>`:""}
+        ${a.lead?`<dt>Délai appro</dt><dd>${a.lead} j</dd>`:""}
+        ${a.replacement?`<dt>Remplacement</dt><dd class="mono">${a.replacement}</dd>`:""}
+        <dt>Statut</dt><dd>${a.archived?`<span class="st mut">Archivé le ${dt(a.archived.date)}</span>`:`<span class="st ok">Actif</span>`}</dd>
+        ${a.archived?`<dt>Motif</dt><dd>${esc(a.archived.reason)}</dd>`:""}
+      </dl>
+      ${a.conv?`<h3>Conversions d'unités</h3><table><tbody>${a.conv.map(([u,f])=>`<tr><td class="mono">1 ${u}</td><td class="n">= ${q(f)} ${a.unit}</td></tr>`).join("")}</tbody></table>`:""}
+      ${code===INTERNAL?`<h3>Références clients liées</h3><table><tbody>${CLIENTS.map(c=>`<tr><td>${esc(c.name)}</td><td class="mono">${esc(c.ref)} ind. ${esc(c.index)}</td></tr>`).join("")}</tbody></table>`:""}
+      ${used.length?`<h3>Cas d'emploi</h3><p class="small" style="margin:0">${used.map(u=>`<span class="mono">${u}</span>`).join(", ")}</p>`:""}
+      <div class="bc">${barcode(code)}</div><div class="small mono muted">${code}</div>
+      <div class="panel no-print">${a.archived
+        ? `<button type="button" data-act="unarchive">Réactiver l'article</button>`
+        : `<label for="arch-reason" style="margin-top:0">Motif d'archivage</label><input id="arch-reason" type="text" value="${esc(fv("arch-reason",""))}" data-form placeholder="ex. article remplacé, plus commandé depuis 2024">
+           <p style="margin:8px 0 0"><button type="button" data-act="archive">Archiver l'article</button></p>`}</div>
+    </div>
+  </div>
+  <div class="card mt"><h2>Fournisseurs : codification automatique et contrôle des doublons</h2>
+    <div class="row"><div><label for="sup-name">Raison sociale du nouveau fournisseur</label><input id="sup-name" type="text" value="${esc(fv("sup-name",""))}" data-form placeholder="ex. FERRURES INDUSTRIE SAS"></div><div style="flex:0"><button type="button" data-act="supplierAdd">Créer</button></div></div>
+    <div class="scroll mt"><table><thead><tr><th>Code</th><th>Raison sociale</th><th class="n">Articles</th></tr></thead><tbody>${suppliers.map(s=>`<tr><td class="mono">${s.code}</td><td>${esc(s.name)}</td><td class="n">${s.n}</td></tr>`).join("")}</tbody></table></div></div>`;
+};
+function whereUsed(code){ const out = new Set(); S.orders.forEach(o => (function walk(n, parent){ if (n.code===code && parent) out.add(parent); (n.children||[]).forEach(ch => walk(ch, n.code)); })(tree(o), null)); return [...out]; }
+function allSuppliers(){
+  const map = {};
+  Object.values(A).filter(a=>a.supplier).forEach(a => { const [code, ...name] = a.supplier.split(" "); (map[code] ||= { code, name:name.join(" "), n:0 }).n++; });
+  Object.values(ALT_SUPPLIERS).flat().forEach(s => { const [code, ...name] = s.split(" "); map[code] ||= { code, name:name.join(" "), n:0 }; });
+  S.suppliersAdded.forEach(s => map[s.code] = { ...s, n:0 });
+  return Object.values(map).sort((x,y)=>x.code<y.code?-1:1);
+}
+const normName = s => s.normalize("NFD").replace(/[̀-ͯ]/g,"").toUpperCase().replace(/\b(SAS|SARL|SA|SASU|EURL|SNC)\b/g,"").replace(/[^A-Z0-9]/g,"");
+
+R.nomenclature = () => {
+  const o = act(), k = compute(o), c = k.c;
+  const opRows = Object.entries(S.routing).map(([art, ops]) => ops.map((op,i) => {
+    const alts = Object.keys(op.times), unitCost = (setupOf(op)/k.N + runOf(op))/60*lineRate(op);
+    return `<tr><td class="mono">${art}</td><td class="n">${op.seq}</td><td>${op.label}</td>
+      <td>${alts.length>1?`<select class="mini" data-route="${art}|${i}|machine" aria-label="Machine préférée ${art} op ${op.seq}">${alts.map(m=>`<option ${m===op.machine?"selected":""}>${m}</option>`).join("")}</select>`:`<span class="mono">${op.machine}</span>`}</td>
+      <td class="n">${numInput(`r-${art}-${i}-setup`, setupOf(op), `class="mini" min="0" max="1440" step="1" data-route="${art}|${i}|setup"`, `Réglage ${art} op ${op.seq} (min)`)}</td>
+      <td class="n">${numInput(`r-${art}-${i}-run`, runOf(op), `class="mini" min="0.1" max="600" step="0.1" data-route="${art}|${i}|run"`, `Temps unitaire ${art} op ${op.seq} (min)`)}</td>
+      <td class="n">${numInput(`r-${art}-${i}-ops`, op.ops, `class="mini" min="0.5" max="10" step="0.5" data-route="${art}|${i}|ops"`, `Nombre d'opérateurs ${art} op ${op.seq}`)}</td>
+      <td class="n">${eur(M[op.machine].rate,0)}/h</td><td class="n">${eur(unitCost,3)}</td></tr>`; }).join("")).join("");
+  return pageHead("Nomenclature et gamme", `Nomenclature de ${INTERNAL} pour <b>${esc(c.name)}</b> (commande ${o.no}, ${k.N} pièces) : base standard de sous-ensembles + personnalisation client en violet. Chaque ligne de gamme a son prix, recalculé quand on modifie temps ou opérateurs.`, [4,6,1]) + `
+  <div class="card"><h2>Nomenclature éclatée</h2><div class="scroll"><table>
+    <thead><tr><th>Article</th><th>Désignation</th><th>Type</th><th class="n">Qté / parent</th><th class="n">Besoin total</th><th>U.</th><th class="n">PMAP</th><th class="n">Valeur</th></tr></thead><tbody>
+    ${k.rows.map(r => { const a = A[r.code], leaf = !r.children;
+      const conv = r.inputUnit ? `<br><span class="small muted">${q(r.input)} ${r.inputUnit} → ${q(r.qty)} KG · chute ${r.scrap*100} %</span>` : (r.note?`<br><span class="small muted">${r.note}</span>`:"");
+      return `<tr class="lvl${Math.min(r.lvl,2)} ${r.custom?"custom":""}"><td class="mono">${r.code}</td><td>${esc(a.label)}${r.custom?' <span class="cust">Client</span>':""}${conv}</td><td><span class="type ${a.type}">${a.type.replace("_"," ")}</span></td><td class="n">${r.lvl?q(r.qty):"—"}</td><td class="n">${q(r.total)}</td><td>${a.unit}</td><td class="n">${leaf?eur(a.pmap,3):""}</td><td class="n">${leaf?eur(r.total*a.pmap):""}</td></tr>`; }).join("")}
+  </tbody></table></div>
+  <p class="small muted">Personnalisation ${esc(c.name)} : ${esc(CUSTOM[c.code].label)}, soit ${eur(k.customCost/k.N)} par coffret. Les autres clients gardent la même base standard avec leur propre surcouche.</p></div>
+  <div class="card mt"><h2>Gammes : prix de chaque ligne</h2>
+    <div class="formula"><b>Prix de la ligne de gamme</b> = coût pièce (temps × taux machine) + nb opérateurs × temps passé × taux MO (${LABOR_RATE} €/h)<br><span class="muted">Le réglage d'un lot est réparti sur la quantité de la commande.</span></div>
+    <div class="scroll mt"><table><thead><tr><th>Article</th><th class="n">Op.</th><th>Libellé</th><th>Machine</th><th class="n">Réglage (min/lot)</th><th class="n">Temps (min/pce)</th><th class="n">Opérateurs</th><th class="n">Taux machine</th><th class="n">Prix / pce</th></tr></thead><tbody>${opRows}</tbody></table></div>
+    <p class="small muted">Ancienne valorisation PMI : toujours 1 opérateur et aucun réglage. L'assemblage final à 2 opérateurs était donc sous-évalué de moitié côté MO.</p>
+  </div>`;
+};
+
+R.stocks = () => {
+  const o = act(), k = compute(o), c = k.c;
+  const rows = Object.entries(A).filter(([cd]) => stocked(cd));
+  const mpRow = (k.mrp||{})["MP-00052"], mpNo = !k.closed && mpRow ? mrp(o, { noAlloc:true })["MP-00052"] : null;
+  const ha = A[S.histArt];
+  // Classement ABC sur la valeur du stock au PMAP.
+  const vals = rows.map(([cd,a]) => [cd, a.stock*a.pmap]).sort((x,y)=>y[1]-x[1]), tot = vals.reduce((s,v)=>s+v[1],0);
+  let cum = 0; const abc = {}; vals.forEach(([cd,v]) => { cum += v; abc[cd] = cum/tot <= 0.8 + 1e-9 || cum === v ? "A" : cum/tot <= 0.95 ? "B" : "C"; });
+  const FREQ = { A:30, B:90, C:365 };
+  const due = rows.filter(([cd]) => (TODAY - D(S.lastCount[cd]))/864e5 >= FREQ[abc[cd]]);
+  const cnt = S.count;
+  return pageHead("Stocks et inventaire", `Valorisation au PMAP, sortie physique FIFO par lot, allocations par client. Stock disponible pour <b>${esc(c.name)}</b> = calcul des besoins par priorité (voir Achats).`, [3]) + `
+  <div class="card"><h2>Action critique n° 3 : allocation mensuelle par client récurrent</h2>
+    <div class="scroll"><table><thead><tr><th>Article</th>${CLIENTS.map(x=>`<th class="n">${esc(x.name)}</th>`).join("")}<th class="n">Total alloué</th></tr></thead><tbody>
+    ${Object.entries(ALLOC).map(([cd,al])=>`<tr><td class="mono">${cd}</td>${CLIENTS.map(x=>`<td class="n">${al[x.code]?q(al[x.code])+" "+A[cd].unit:"—"}</td>`).join("")}<td class="n">${q(allocTotal(cd))}</td></tr>`).join("")}
+    </tbody></table></div>
+    ${mpRow && mpNo ? (() => { const myAl = (ALLOC["MP-00052"]||{})[c.code]||0; return `<div class="alert ${myAl?"info":"warn"} mt"><b>Tôle MP-00052 pour ${o.no} (${esc(c.name)}) :</b> ${q(mpRow.avail)} kg disponibles avec les allocations, ${q(mpNo.avail)} kg sans. ${myAl ? `${q(myAl)} kg sont réservés chaque mois à ce client récurrent : les autres commandes ne peuvent pas les consommer.${mpNo.avail > mpRow.avail ? ` Son disponible libre est diminué des ${q(allocTotal("MP-00052")-myAl)} kg alloués aux autres clients récurrents.` : ""}` : `Ce client n'a pas d'allocation sur la tôle : il passe après les commandes prioritaires et les clients alloués.`}</div>`; })() : ""}
+  </div>
+  <div class="card mt"><h2>État du stock</h2><div class="scroll"><table>
+    <thead><tr><th>Article</th><th>Empl.</th><th class="n">Physique</th><th class="n">Réservé OF</th><th class="n">Alloué clients</th><th class="n">Dispo ${esc(c.name)}</th><th class="n">Besoin ${o.no}</th><th class="n">Stock sécu.</th><th class="n">PMAP</th><th class="n">Valeur</th><th>ABC</th></tr></thead><tbody>
+    ${rows.map(([cd,a])=>{ const r = (k.mrp||{})[cd];
+      return `<tr><td class="mono">${cd}</td><td class="mono small">${a.loc}</td><td class="n">${q(a.stock)}</td><td class="n">${q(reservedOF(cd))}</td><td class="n">${q(allocTotal(cd))}</td><td class="n">${r?`<b>${q(r.avail)}</b>`:"—"}</td><td class="n">${r?`<span class="st ${r.need>r.avail+r.onOrder?"bad":"ok"}">${q(r.need)}</span>`:"—"}</td><td class="n">${q(a.safety)}</td><td class="n">${eur(a.pmap,3)}</td><td class="n">${eur(a.stock*a.pmap,0)}</td><td>${abc[cd]}</td></tr>`; }).join("")}
+    </tbody><tfoot><tr><td colspan="9">Valeur totale au PMAP</td><td class="n">${eur(tot,0)}</td><td></td></tr></tfoot></table></div></div>
+  <div class="g2 mt">
+    <div class="card"><h2>Entrées, sorties et PMAP</h2>
+      <label for="h-art" style="margin-top:0">Article</label><select id="h-art" data-bind="histArt">${rows.map(([cd])=>`<option ${cd===S.histArt?"selected":""}>${cd}</option>`).join("")}</select>
+      <div class="scroll mt"><table><thead><tr><th>Date</th><th>Mouvement</th><th class="n">Qté</th><th class="n">Coût d'entrée</th><th class="n">Stock après</th><th class="n">PMAP après</th></tr></thead><tbody>
+      ${ha.hist.map(m=>`<tr><td>${dt(m.date)}</td><td>${m.type==="IN"?(m.init?"Stock d'ouverture":`Réception <span class="mono">${m.lot}</span>${m.ref?` · ${esc(m.ref)}`:""}`):m.type==="OUT"?`Sortie ${esc(m.ref)}`:`Ajustement inventaire${m.lot?` <span class="mono">${m.lot}</span>`:""}`}</td><td class="n">${m.type==="OUT"?"−":m.type==="ADJ"&&m.qty<0?"":"+"}${q(m.qty)}</td><td class="n">${m.type==="IN"?fr(m.price+(m.freight||0)/m.qty,4):"—"}</td><td class="n">${q(m.stockAfter)}</td><td class="n">${fr(m.pmapAfter,4)}</td></tr>`).join("")}
+      </tbody></table></div>
+      <p class="small muted">Le PMAP est recalculé à chaque réception (prix + fret). Une sortie le laisse inchangé. Dernier prix d'achat : ${fr(ha.dpa,3)} € — c'est lui qui valorisait tout le stock dans PMI.</p></div>
+    <div class="card"><h2>Lots en stock (ordre FIFO)</h2><table><thead><tr><th>Lot</th><th>Entrée</th><th class="n">Reste</th><th class="n">Coût d'entrée</th></tr></thead><tbody>
+      ${ha.lots.map((l,i)=>`<tr><td class="mono">${l.lot}${i===0?' <span class="st info">prochaine sortie</span>':""}</td><td>${dt(l.date)}</td><td class="n">${q(l.qty)} ${ha.unit}</td><td class="n">${fr(l.cost,4)}</td></tr>`).join("")}
+      </tbody></table><p class="small muted">Sortie : le lot le plus ancien d'abord. Un lot vide passe au suivant ; une sortie supérieure au stock est refusée (pas de stock négatif).</p></div>
+  </div>
+  <div class="card mt"><h2>Inventaire tournant</h2>
+    <p class="small muted" style="margin-top:-4px">Fréquence par classe ABC : A tous les mois, B tous les trimestres, C une fois par an. ${due.length} article(s) à compter aujourd'hui.</p>
+    <div class="scroll"><table><thead><tr><th>Article</th><th>Classe</th><th>Dernier comptage</th><th>Empl.</th><th></th></tr></thead><tbody>
+      ${due.map(([cd,a])=>`<tr><td class="mono">${cd}</td><td>${abc[cd]}</td><td>${dt(S.lastCount[cd])}</td><td class="mono small">${a.loc}</td><td><button class="sm" type="button" data-act="countOpen" data-code="${cd}">Compter</button></td></tr>`).join("") || `<tr><td colspan="5" class="muted">Rien à compter aujourd'hui.</td></tr>`}
+    </tbody></table></div>
+    ${cnt ? (() => { const a = A[cnt.code], lot = a.lots.find(l=>l.lot===cnt.lot), theo = lot ? lot.qty : 0, counted = fv("cnt-qty", "");
+      const diff = counted === "" || Number(counted) < 0 ? null : Number(counted) - theo;
+      return `<div class="panel"><h3 style="margin-top:0">Comptage ${cnt.code} · ${esc(a.label)}</h3>
+        <div class="row"><div><label for="cnt-lot">Lot (emplacement ${a.loc})</label><select id="cnt-lot" data-bind="countLot">${a.lots.map(l=>`<option ${l.lot===cnt.lot?"selected":""}>${l.lot}</option>`).join("")}</select></div>
+        <div><label>Quantité théorique</label><input type="text" value="${q(theo)} ${a.unit}" disabled></div>
+        <div><label for="cnt-qty">Quantité scannée (${a.unit})</label>${numInput("cnt-qty", counted, `min="0" max="100000" step="${a.unit==="PCE"?1:0.001}" data-form data-live`)}</div></div>
+        ${diff!=null?`<p class="small">Écart : <b>${diff>0?"+":""}${q(diff)} ${a.unit}</b>, soit ${eur(diff*a.pmap)} au PMAP.</p>`:""}
+        <p style="margin:8px 0 0"><button class="primary" type="button" data-act="countSave">Valider le comptage</button> <button type="button" data-act="countCancel">Annuler</button></p></div>`; })() : ""}
+    <p class="small muted">Stock dormant repéré : CPT-00191 (${eur(A["CPT-00191"].stock*A["CPT-00191"].pmap,0)}), consommé seulement en remplacement de CPT-00190.</p>
+  </div>`;
+};
+
+R.achats = () => {
+  const o = act(), k = compute(o), c = k.c;
+  const rows = Object.values(k.mrp||{});
+  const lockShort = (k.mrp||{})["CPT-00190"]?.short;
+  const rfq = S.rfq;
+  return pageHead("Achats", `Besoins nets de la commande ${o.no} (${esc(c.name)}) : stock, allocation du client, besoins des commandes prioritaires et commandes fournisseurs en cours. Une suggestion reconstitue le stock de sécurité, arrondie à l'unité d'achat. On commande directement depuis la ligne.`) + `
+  ${k.closed?`<div class="alert ok">Commande ${STATUS[o.status][0].toLowerCase()} : besoins déjà consommés, aucune suggestion.</div>`:""}
+  ${!k.closed && ral(o)===0?`<div class="alert ok">Tout est livré : aucun besoin restant.</div>`:""}
+  ${(lockShort||o.useRepl)?`<div class="alert warn" style="margin-bottom:16px"><b>CPT-00190 en rupture partielle.</b> Article de remplacement défini : CPT-00191 (${q(A["CPT-00191"].stock)} en stock, ${eur(A["CPT-00191"].pmap)} au lieu de ${eur(A["CPT-00190"].pmap)}).<label class="check"><input type="checkbox" data-bind="useRepl" ${o.useRepl?"checked":""} ${o.status==="EN_FAB"?"disabled":""}> Utiliser l'article de remplacement sur cette commande</label></div>`:""}
+  ${rows.length?`<div class="card"><div class="scroll"><table>
+    <thead><tr><th></th><th>Article</th><th class="n">Besoin</th><th class="n">Pris par cdes prioritaires</th><th class="n">Disponible</th><th class="n">En commande</th><th class="n">Manque</th><th>Suggestion (unité d'achat)</th><th>Fournisseur</th><th class="n">Montant</th><th></th></tr></thead><tbody>
+    ${rows.map(r=>{ const a = A[r.code], ch = S.offerChoice[r.code], sup = ch ? ch.supplier : a.supplier, price = ch ? ch.price : a.dpa, moq = ch ? ch.moq : (a.buy?.moq||1);
+      if (r.st) return `<tr><td>${r.toOrder>0?`<input type="checkbox" id="sel-${r.code}" data-form ${fv("sel-"+r.code,"on")==="on"?"checked":""} aria-label="Sélectionner ${r.code}">`:""}</td><td class="mono">${r.code}</td><td class="n">${q(r.need)} ${a.unit}</td><td class="n muted">—</td><td class="n muted">—</td><td class="n">${r.onOrder?q(r.onOrder):"—"}</td><td class="n muted">—</td><td>${r.toOrder>0?`${q(r.toOrder)} ${a.unit} <span class="small muted">· S/T liée à l'OF</span>`:`<span class="st ok">Commandée</span>`}</td><td>${esc(a.supplier)}</td><td class="n">${r.toOrder>0?eur(r.toOrder*a.pmap,0):""}</td><td></td></tr>`;
+      return `<tr><td>${r.buy>0?`<input type="checkbox" id="sel-${r.code}" data-form ${fv("sel-"+r.code, r.short>0?"on":"off")==="on"?"checked":""} aria-label="Sélectionner ${r.code}">`:""}</td><td class="mono">${r.code}</td><td class="n">${q(r.need)} ${a.unit}</td><td class="n">${r.taken?q(r.taken):"—"}</td><td class="n">${q(r.avail)}</td><td class="n">${r.onOrder?`<span class="st info">${q(r.onOrder)}</span>`:"—"}</td><td class="n">${r.short?`<span class="st bad">${q(r.short)}</span>`:"0"}</td>
+        <td>${r.buy>0?`${numInput("buy-"+r.code, fv("buy-"+r.code, Math.max(r.buy, ch?Math.ceil(ch.moq/a.buy.factor):0)), `class="mini" min="${Math.max(1,Math.ceil(moq/a.buy.factor))}" max="100000" step="1" data-form`, `Quantité à commander ${r.code} en ${a.buy.unit}`)} ${a.buy.unit} <span class="small muted">= ${q(r.buyStock)} ${a.unit}${r.belowSafety?" · réappro sécurité":""}</span>`:`<span class="st ok">Stock OK</span>`}</td>
+        <td>${esc(sup)}${ch?' <span class="st info">offre DP</span>':""}</td><td class="n">${r.buy>0?eur(r.buyStock*price,0):""}</td>
+        <td>${r.buy>0?`<button class="sm" type="button" data-act="rfq" data-code="${r.code}">Consulter (DP)</button>`:""}</td></tr>`; }).join("")}
+    </tbody></table></div>
+    ${rows.some(r=>r.buy>0||r.toOrder>0)?`<p style="margin:12px 0 0"><button class="primary" type="button" data-act="placeCF">Passer commande (lignes cochées, une CF par fournisseur)</button> <span class="small muted">Les manques sont cochés ; les réassorts de stock de sécurité sont à cocher si besoin.</span></p>`:""}
+    ${k.dispo?`<div class="alert ${k.late?"bad":"ok"} mt">Délai d'approvisionnement retenu : <b>${k.maxLead} j</b> (achat à lancer ou réception attendue). Livraison client prévue le ${dt(k.delivery)}.</div>`:""}
+  </div>`:""}
+  ${rfq?`<div class="card mt"><h2>Demande de prix ${rfq.no} · ${rfq.code} · ${q(rfq.qty)} ${A[rfq.code].unit}</h2><div class="scroll"><table>
+    <thead><tr><th>Fournisseur</th><th class="n">Prix unitaire</th><th class="n">MOQ</th><th class="n">Fret</th><th class="n">Coût rendu</th><th class="n">Délai</th><th class="n">Montant</th><th></th></tr></thead><tbody>
+    ${rfq.offers.map((f,i)=>{ const qy = Math.max(rfq.qty, f.moq), lc = f.price + f.freight/qy; return `<tr ${S.offerChoice[rfq.code]?.supplier===f.supplier?'class="sel"':""}><td>${esc(f.supplier)}</td><td class="n">${fr(f.price,3)}</td><td class="n">${q(f.moq)}</td><td class="n">${eur(f.freight,0)}</td><td class="n">${fr(lc,3)}</td><td class="n">${f.lead} j</td><td class="n">${eur(qy*lc,0)}</td><td><button class="sm" type="button" data-act="rfqPick" data-i="${i}">Retenir</button></td></tr>`; }).join("")}
+    </tbody></table></div><p class="small muted">Les offres non retenues restent tracées dans la DP (statistiques fournisseurs).</p></div>`:""}
+  <div class="card mt"><h2>Commandes fournisseurs</h2><div class="scroll"><table>
+    <thead><tr><th>CF</th><th>Date</th><th>Fournisseur</th><th>Cde client</th><th>Article</th><th class="n">Qté</th><th class="n">Reçu</th><th class="n">Montant HT</th><th>Réception prévue</th><th></th></tr></thead><tbody>
+    ${S.pos.slice().reverse().flatMap(p=>p.lines.map((l,i)=>{ const done = l.received >= l.qtyStock - 1e-9, open = S.rcv && S.rcv.cf===p.no && S.rcv.i===i, a = A[l.code];
+      return `<tr><td class="mono">${p.no}</td><td>${dt(p.date)}</td><td>${esc(p.supplier)}</td><td class="mono">${p.order}</td><td class="mono">${l.code}</td><td class="n">${q(l.qtyStock)} ${a.unit}</td><td class="n">${q(l.received)}</td><td class="n">${eur(l.qtyStock*l.price,0)}</td><td>${dt(l.due)}</td>
+        <td>${done?'<span class="st ok">Reçue</span>':a.noStock?'<span class="st mut">S/T</span>':`<button class="sm" type="button" data-act="rcvOpen" data-cf="${p.no}" data-i="${i}">Réceptionner</button>`}</td></tr>
+        ${open?`<tr><td colspan="10"><div class="panel"><div class="row">
+          <div><label for="rcv-qty">Quantité reçue (${a.unit}), reliquat ${q(l.qtyStock-l.received)}</label>${numInput("rcv-qty", fv("rcv-qty", l.qtyStock-l.received), `min="${a.unit==="PCE"?1:0.001}" max="${l.qtyStock-l.received}" step="${a.unit==="PCE"?1:"any"}" data-form`)}</div>
+          <div><label for="rcv-price">Prix unitaire facturé (€)</label>${numInput("rcv-price", fv("rcv-price", l.price), 'min="0" max="10000" step="0.001" data-form')}</div>
+          <div><label for="rcv-freight">Fret de la livraison (€)</label>${numInput("rcv-freight", fv("rcv-freight", 0), 'min="0" max="100000" step="0.01" data-form')}</div></div>
+          <p style="margin:10px 0 0"><button class="primary" type="button" data-act="rcvSave">Valider la réception (lot + PMAP)</button> <button type="button" data-act="rcvCancel">Annuler</button></p></div></td></tr>`:""}`; })).join("") || `<tr><td colspan="10" class="muted">Aucune commande fournisseur.</td></tr>`}
+    </tbody></table></div></div>`;
+};
+
+R.production = () => {
+  const o = act(), k = compute(o);
+  const others = S.orders.filter((x,i)=>i!==S.active && x.status==="EN_FAB").map(x=>compute(x,true));
+  const reworks = S.reworks;
+  const cols = Object.keys(M).map(m => {
+    const mine = k.ofs.flatMap(of => of.lines.filter(l=>l.op.machine===m));
+    const theirs = others.flatMap(ko => ko.ofs.flatMap(of => of.lines.filter(l=>l.op.machine===m).map(l=>({l,ko}))));
+    const rw = reworks.filter(r=>r.machine===m);
+    const hours = mine.reduce((s,l)=>s+(l.setup+l.run*k.N)/60,0) + theirs.reduce((s,x)=>s+(x.l.setup+x.l.run*x.ko.N)/60,0) + rw.reduce((s,r)=>s+r.hours,0);
+    return `<div class="col" data-drop="${m}"><h3><span class="mono">${m}</span><span class="muted">${fr(hours,1)} h</span></h3>
+      ${rw.map(r=>`<div class="kc rework"><b>${r.no}</b><br>Retouche ${r.op} · ${r.qty} pce<br><span class="muted">${r.nc}</span></div>`).join("")}
+      ${theirs.map(x=>`<div class="kc other"><b>${x.l.code}</b><br>${x.l.op.label} · ${x.ko.N} pce<br><span class="muted">${esc(x.ko.c.name)}</span></div>`).join("")}
+      ${mine.map(l=>{ const alts = Object.keys(l.op.times);
+        return `<div class="kc" ${alts.length>1?`draggable="true" data-drag="${l.art}|${l.idx}"`:""}><b>${l.code}</b><br>${l.op.label} · ${k.N} pce${l.shared?" · <em>réglage partagé</em>":""}<br><span class="muted">${esc(k.c.name)}</span>
+        ${alts.length>1?`<br><select class="mini" data-assign="${l.art}|${l.idx}" aria-label="Déplacer ${l.code}">${alts.map(mm=>`<option ${mm===m?"selected":""}>${mm}</option>`).join("")}</select>`:""}</div>`; }).join("")}
+    </div>`; }).join("");
+  const ncs = S.ncs.filter(n=>n.order===o.no);
+  return pageHead("OF, qualité et planning", `L'OF du PF lance automatiquement les OF de ses 2 sous-ensembles. Une non-conformité se déclare depuis l'OF, avec son coût calculé et, si besoin, un OF de retouche lié. Le planning se fait par glisser-déposer entre les machines prévues dans la gamme.`, [4]) + `
+  ${o.status==="A_LANCER"||o.status==="BLOQUEE"?`<div class="alert info" style="margin-bottom:16px">OF prévisionnels : ils seront créés au lancement de la commande (page Commandes).</div>`:""}
+  <div class="g3">${k.ofs.map(of=>`<div class="card of"><h2 style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><span class="mono">${of.no}</span><span class="type ${A[of.code].type}">${of.code}</span></h2>
+    <div class="small muted">${esc(A[of.code].label)} · ${k.N} pce${of.parent?` · lance ${ofNo(o.of+1)} et ${ofNo(o.of+2)}`:""}</div>${barcode(of.no)}
+    <table><tbody>${of.lines.map(l=>`<tr><td class="mono small">${l.code}</td><td>${l.op.label}<br><span class="small muted">${l.op.machine}${l.op.ops>1?` · ${l.op.ops} opérateurs`:""}</span></td></tr>`).join("")}</tbody></table>
+    <div class="small" style="margin-top:6px">${fr(of.hours,1)} h · ${eur(of.cost,0)}</div>
+    ${o.status==="EN_FAB"?(S.ncOf===of.no?ncForm(of, k):`<p style="margin:8px 0 0" class="no-print"><button class="sm" type="button" data-act="ncOpen" data-of="${of.no}">Déclarer une NC</button></p>`):""}</div>`).join("")}</div>
+  <div class="card mt"><h2>Non-conformités de la commande ${o.no}</h2><div class="scroll"><table><thead><tr><th>NC</th><th>OF / opération</th><th class="n">Qté</th><th>Cause</th><th>Décision</th><th class="n">Coût</th><th>OF de retouche</th></tr></thead><tbody>
+    ${ncs.map(n=>`<tr><td class="mono">${n.no}</td><td class="mono small">${n.op}</td><td class="n">${n.qty}</td><td>${n.cause}</td><td>${n.decision}</td><td class="n">${eur(n.cost)}</td><td class="mono">${n.rework||"—"}</td></tr>`).join("") || `<tr><td colspan="7" class="muted">Aucune NC déclarée.</td></tr>`}
+  </tbody></table></div></div>
+  <div class="card mt"><div class="row" style="align-items:center"><h2 style="margin:0">Planning Kanban par machine</h2>
+    <label class="check" style="margin:0"><input type="checkbox" data-bind="grouped" ${S.grouped?"checked":""}> Regrouper les découpes des 2 S/E (même tôle : un seul réglage)</label></div>
+    <p class="small muted">Glissez une découpe de LASER-01 vers POINC-02 (ou utilisez le menu de la carte) : les temps de la gamme alternative s'appliquent. Cartes grises : autres commandes ; rouges : retouches.</p>
+    <div class="kanban">${cols}</div></div>`;
+};
+function ncForm(of, k){
+  return `<div class="panel"><h3 style="margin-top:0">Non-conformité sur ${of.no}</h3>
+    <label for="nc-op">Opération</label><select id="nc-op" data-form>${of.lines.map(l=>`<option value="${l.code}" ${fv("nc-op","")===l.code?"selected":""}>${l.code} · ${l.op.label}</option>`).join("")}</select>
+    <div class="row"><div><label for="nc-qty">Quantité non conforme</label>${numInput("nc-qty", fv("nc-qty",1), `min="1" max="${k.N}" step="1" data-form`)}</div>
+    <div><label for="nc-by">Émetteur</label><select id="nc-by" data-form>${Object.entries(OPERATORS).map(([b,n])=>`<option value="${b}" ${fv("nc-by","")===b?"selected":""}>${n}</option>`).join("")}</select></div></div>
+    <div class="row"><div><label for="nc-cause">Cause</label><select id="nc-cause" data-form>${["Réglage","Matière","Plan / indice","Opérateur"].map(x=>`<option ${fv("nc-cause","")===x?"selected":""}>${x}</option>`).join("")}</select></div>
+    <div><label for="nc-dec">Décision</label><select id="nc-dec" data-form>${["Retouche","Rebut","Dérogation"].map(x=>`<option ${fv("nc-dec","Retouche")===x?"selected":""}>${x}</option>`).join("")}</select></div></div>
+    <p style="margin:10px 0 0"><button class="primary sm" type="button" data-act="ncSave" data-of="${of.no}">Enregistrer la NC</button> <button class="sm" type="button" data-act="ncCancel">Annuler</button></p></div>`;
+}
+
+R.atelier = () => {
+  const ref = Object.fromEntries(S.orders.flatMap(o => { const k = compute(o, true); return k.ofs.flatMap(of => of.lines.map(l => [l.code, { l, N:k.N }])); }));
+  const setups = S.pointages.filter(p=>p.kind==="SETUP" && ref[p.op]), runs = S.pointages.filter(p=>p.kind==="RUN" && ref[p.op]);
+  const totWait = setups.reduce((s,p)=>s+(p.wait||0),0), totGap = setups.reduce((s,p)=>s+Math.max(0,p.min-ref[p.op].l.setup),0);
+  const waitCost = setups.reduce((s,p)=>s+(p.wait||0)/60*lineRate(ref[p.op].l.op),0);
+  const k = compute(act(), true), allOps = k.ofs.flatMap(of => of.lines);
+  const runOk = runs.every(p => Math.abs(p.min/(ref[p.op].l.run*ref[p.op].N)-1) <= 0.05);
+  return pageHead("Pointages atelier", "Démarrage et arrêt par scan du badge opérateur puis du code-barre de l'opération (fiche suiveuse). Le réglage est pointé en deux temps : attente ou recherche matière, puis réglage machine.", [7,6]) + `
+  <div class="kpis"><div class="kpi"><div class="l">Écart total de mise en route</div><div class="v" style="color:var(--bad)">+${q(totGap)} min</div><div class="d">sur ${setups.length} réglages pointés</div></div>
+    <div class="kpi"><div class="l">Dont attente / recherche matière</div><div class="v">${totGap?fr(Math.min(1,totWait/totGap)*100,0):0} %</div><div class="d">${q(totWait)} min : transition entrepôt → poste</div></div>
+    <div class="kpi"><div class="l">Gain d'un kit matière en bord de ligne</div><div class="v" style="color:var(--ok)">${eur(waitCost,0)}</div><div class="d">sur ces lots (attente supprimée)</div></div>
+    <div class="kpi"><div class="l">Temps de production</div><div class="v" style="color:var(--${runOk?"ok":"bad"})">${runOk?"conforme":"à recaler"}</div><div class="d">${runs.map(p=>`${fr((p.min/(ref[p.op].l.run*ref[p.op].N)-1)*100,1)} %`).join(" · ")} vs gamme</div></div></div>
+  <div class="card mt"><h2>Action critique n° 7 : mise en route, opération par opération</h2><div class="scroll"><table>
+    <thead><tr><th>Opération</th><th>Machine</th><th class="n">Réglage gamme</th><th class="n">Mesuré</th><th class="n">dont attente matière</th><th class="n">dont réglage</th><th class="n">Écart</th><th class="n">Coût de l'écart</th><th></th></tr></thead><tbody>
+    ${setups.map((p,i)=>{ const r = ref[p.op].l, gap = p.min - r.setup, cost = gap/60*lineRate(r.op), regl = p.min - (p.wait||0);
+      return `<tr><td class="mono small">${p.op}</td><td class="mono small">${r.op.machine}</td><td class="n">${r.shared?'0 <span class="small muted">(partagé)</span>':q(r.setup)+" min"}</td><td class="n">${q(p.min)} min</td><td class="n">${q(p.wait||0)} min</td><td class="n">${q(regl)} min</td><td class="n"><span class="st ${gap>2?"bad":"ok"}">${gap>0?"+":""}${q(gap)} min</span></td><td class="n">${eur(cost)}</td>
+        <td>${r.shared?'<span class="st warn">Regroupement non respecté</span>':Math.abs(gap)>=1?`<button class="sm" type="button" data-act="applySetup" data-p="${S.pointages.indexOf(p)}" data-mode="all">Recaler sur le mesuré</button> <button class="sm" type="button" data-act="applySetup" data-p="${S.pointages.indexOf(p)}" data-mode="kit">Recaler avec kit bord de ligne</button>`:""}</td></tr>`; }).join("")}
+    </tbody></table></div>
+    <h3>Production : la gamme est juste</h3><table><thead><tr><th>Opération</th><th class="n">Gamme</th><th class="n">Mesuré</th><th class="n">Écart</th></tr></thead><tbody>
+      ${runs.map(p=>{ const r = ref[p.op], th = r.l.run*r.N; return `<tr><td class="mono small">${p.op}</td><td class="n">${q(th)} min</td><td class="n">${q(p.min)} min</td><td class="n"><span class="st ${Math.abs(p.min/th-1)<=0.05?"ok":"bad"}">${fr((p.min/th-1)*100,1)} %</span></td></tr>`; }).join("")}</tbody></table>
+    <p class="small muted">Fichier « Blocs fonctionnels – FLUX » : « Mise en route de la gamme de fab trop longue. Piste : la transition de l'entrepôt vers le démarrage ». Les pointages le confirment : l'écart vient surtout de l'attente matière. Deux leviers : recaler la gamme pour un prix de revient juste, puis préparer la matière au bord de ligne (BP la veille, 5S, SMED).</p></div>
+  <div class="g2 mt">
+    <div class="card"><h2>Simulateur de pointage</h2>
+      <label>1. Scanner un badge</label><div class="badge-btn">${Object.entries(OPERATORS).map(([b,n])=>`<button type="button" data-act="simBadge" data-b="${b}" aria-pressed="${S.sim.badge===b}"><span class="mono">${b}</span> ${n.split(" ")[0]}</button>`).join("")}</div>
+      <label for="sim-op">2. Scanner l'opération (commande active)</label><select id="sim-op" data-form>${allOps.map(l=>`<option value="${l.code}" ${fv("sim-op","")===l.code?"selected":""}>${l.code} · ${l.op.label} · ${l.op.machine}</option>`).join("")}</select>
+      <div class="row"><div><label for="sim-kind">3. Type</label><select id="sim-kind" data-bind="simKind"><option value="SETUP" ${S.sim.kind==="SETUP"?"selected":""}>Réglage</option><option value="RUN" ${S.sim.kind==="RUN"?"selected":""}>Production</option></select></div>
+      <div><label for="sim-min">Durée (min)</label>${numInput("sim-min", fv("sim-min",30), 'min="1" max="1440" step="1" data-form')}</div>
+      ${S.sim.kind==="SETUP"?`<div><label for="sim-wait">dont attente matière (min)</label>${numInput("sim-wait", fv("sim-wait",0), 'min="0" max="1440" step="1" data-form')}</div>`:""}</div>
+      <p style="margin:12px 0 0"><button class="primary" type="button" data-act="simRecord" ${S.sim.badge?"":"disabled"}>Démarrer puis arrêter (enregistrer)</button></p>
+      <p class="small muted">Sur la tablette, l'opérateur scanne au début et à la fin : la durée est mesurée, pas déclarée. Toute valeur négative est refusée.</p></div>
+    <div class="card"><h2>Journal des pointages</h2><div class="scroll"><table><thead><tr><th>Heure</th><th>Opérateur</th><th>Opération</th><th>Type</th><th class="n">Durée</th><th class="n">Attente</th></tr></thead><tbody>
+      ${S.pointages.slice().reverse().map(p=>`<tr><td>${p.at}</td><td>${OPERATORS[p.badge]}</td><td class="mono small">${p.op}</td><td>${p.kind==="SETUP"?"Réglage":"Production"}</td><td class="n">${q(p.min)} min</td><td class="n">${p.kind==="SETUP"?q(p.wait||0)+" min":"—"}</td></tr>`).join("")}
+      </tbody></table></div></div>
+  </div>`;
+};
+
+R.expedition = () => {
+  const o = act(), k = compute(o), c = k.c, pf = A[INTERNAL];
+  S.snIndex = Math.min(S.snIndex, Math.max(0, o.qty-1));
+  const sn = i => "SN26-" + pad(4801 + i, 6);
+  const pNo = Math.floor(S.snIndex/PER_PALLET)+1, onP = Math.min(PER_PALLET, o.qty-(pNo-1)*PER_PALLET), pGross = onP*k.unitGross + A["EMB-00020"].weight;
+  const allWeights = Object.keys(A).filter(stocked).every(cd => A[cd].weight != null);
+  const R0 = ral(o), qBL = +fv("bl-qty", R0), blOk = Number.isInteger(qBL) && qBL >= 1 && qBL <= R0;
+  const kb = blOk ? compute({ ...o, qty:qBL }, true) : null;
+  // Bon de préparation : besoins du reste à livrer, par destination.
+  const bpRows = o.status==="EN_FAB" ? (() => { const rows = explode(tree(o), R0, o.useRepl).rows.filter(r => !r.children && !A[r.code].noStock);
+    const dest = r => r.code==="MP-00052" ? "Atelier – découpe" : r.parent==="SE-00311" ? "Atelier – soudure" : r.parent==="SE-00312" ? "Montage porte" : "Conditionnement";
+    const agg = {}; rows.forEach(r => { const key = r.code; (agg[key] ||= { code:r.code, qty:0, dest:dest(r), custom:r.custom }).qty += r.total; });
+    if (agg["EMB-00020"]) agg["EMB-00020"].qty = Math.ceil(R0/PER_PALLET);
+    return Object.values(agg); })() : [];
+  const groups = [...new Set(bpRows.map(r=>r.dest))];
+  const pickedCount = bpRows.filter(r=>o.picked[r.code]).length;
+  return pageHead("Préparation et livraison", "Bon de préparation par destination, puis BL (total ou partiel) qui met à jour le reste à livrer. Le champ transport est exploité : transporteur, tarif par zone, palettes et poids calculés.", [2]) + `
+  <div class="g2">
+    <div class="card"><h2>Action critique n° 2 : transport de ${o.no}</h2>
+      <label for="carrier">Transporteur</label><select id="carrier" data-bind="carrier" ${["EXPEDIEE","FACTUREE"].includes(o.status)?"disabled":""}>${Object.entries(CARRIERS).map(([id,cr])=>`<option value="${id}" ${o.carrier===id?"selected":""}>${cr.name} · ${eur(cr.rates[c.zone],0)}/palette${id===cheapest(c.zone)?" (le moins cher)":""}</option>`).join("")}</select>
+      <dl class="kv mt"><dt>Destination</dt><dd>${esc(c.city)} · zone ${c.zone} · ${c.transit} j</dd><dt>Incoterm</dt><dd>${c.incoterm} (transport payé par EOLIA)</dd>
+        <dt>Coût standard dans le PRV</dt><dd>${eur(k.rate/PER_PALLET)} / coffret (palette pleine)</dd>
+        <dt>Commande entière : ${k.pallets} palette(s)</dt><dd>${eur(k.transportReal,0)} réels</dd>
+        ${k.transportReal-k.transportStd>0.005?`<dt>Écart palette incomplète</dt><dd style="color:var(--warn)">+${eur(k.transportReal-k.transportStd)}</dd>`:""}</dl>
+      <div class="alert info mt">Le coût standard entre dans le <a href="#/prix">prix de revient</a>, le coût réel est calculé à chaque BL. Dans PMI, le transport était suivi sur Excel et absent du PRV.</div></div>
+    <div class="card"><h2>Poids, EMEBI et TVA intracommunautaire</h2>
+      <dl class="kv"><dt>Poids net (${o.qty} × ${q(pf.weight)} kg)</dt><dd>${fr(k.net,1)} kg</dd><dt>Poids brut / coffret emballé</dt><dd>${fr(k.unitGross,2)} kg</dd><dt>Poids brut commande</dt><dd>${fr(k.gross,1)} kg</dd>
+      <dt>Poids renseigné sur tous les articles stockés</dt><dd>${allWeights?'<span class="st ok">Oui</span>':'<span class="st bad">Non</span>'}</dd></dl>
+      ${k.isEU?`<div class="alert warn mt"><b>Livraison intracommunautaire vers ${c.country} :</b> ligne EMEBI (ex-DEB) générée à chaque facture (NC ${pf.customs}, poids net, valeur). L'exonération de TVA repose sur le n° de TVA du client (${c.vat}), la preuve du transport et l'état récapitulatif TVA.</div>`:`<div class="alert ok mt">Client France : pas d'EMEBI. Le poids sert au bon de transport.</div>`}</div>
+  </div>
+  <div class="card mt"><h2>Bon de préparation ${o.status==="EN_FAB"?`BP26-${pad(o.of)} · ${pickedCount}/${bpRows.length} lignes préparées`:""}</h2>
+    ${o.status!=="EN_FAB" ? `<p class="muted" style="margin:0">${["A_LANCER","BLOQUEE"].includes(o.status)?"Lancez la commande en fabrication pour éditer le bon de préparation.":"Commande soldée : préparation terminée."}</p>` :
+      groups.map(g=>`<h3>${g}</h3><div class="scroll"><table><thead><tr><th>Préparé</th><th>Article</th><th>Désignation</th><th class="n">Qté</th><th>Emplacement</th><th>Lot FIFO proposé</th></tr></thead><tbody>
+        ${bpRows.filter(r=>r.dest===g).map(r=>{ const a = A[r.code]; return `<tr ${r.custom?'class="custom"':""}><td><input type="checkbox" data-pick="${r.code}" data-qty="${r.qty}" ${o.picked[r.code]?"checked disabled":""} aria-label="Préparé ${r.code}"></td><td class="mono">${r.code}</td><td>${esc(a.label)}${r.custom?' <span class="cust">Client</span>':""}</td><td class="n">${q(r.qty)} ${a.unit}</td><td class="mono small">${a.loc}</td><td class="mono small">${o.picked[r.code]?"sorti":a.lots[0]?.lot||"—"}</td></tr>`; }).join("")}
+      </tbody></table></div>`).join("") + `<p class="small muted">Cocher une ligne = scan de sortie magasin : le stock est décrémenté en FIFO, la réservation de l'OF disparaît. Une sortie supérieure au stock est refusée.</p>`}
+  </div>
+  <div class="card mt"><h2>Bon de livraison</h2>
+    ${o.status==="EN_FAB" && R0>0 ? `<div class="row"><div><label for="bl-qty">Quantité de ce BL (RAL : ${R0})</label>${numInput("bl-qty", fv("bl-qty",R0), `min="1" max="${R0}" step="1" data-form data-live`)}</div>
+      <div><label>Palettes / poids brut</label><input type="text" disabled value="${kb?`${kb.pallets} pal. · ${fr(kb.gross,1)} kg`:"—"}"></div>
+      <div><label>Transport réel du BL</label><input type="text" disabled value="${kb?eur(kb.transportReal,0):"—"}"></div></div>
+      <p style="margin:12px 0 0"><button class="primary" type="button" data-act="bl">Éditer le BL ${blOk&&qBL<R0?"partiel":""}</button></p>`
+    : `<p class="muted" style="margin:0">${R0===0?"Tout est livré.":"Le BL s'édite pour une commande en fabrication."}</p>`}
+    ${o.bls.length?`<h3>BL émis</h3><table><thead><tr><th>BL</th><th>Date</th><th class="n">Qté</th><th>Facture</th></tr></thead><tbody>${o.bls.map(b=>`<tr><td class="mono">${b.no}</td><td>${dt(b.date)}</td><td class="n">${b.qty}</td><td class="mono">${b.inv||'<a href="#/compta">à facturer</a>'}</td></tr>`).join("")}</tbody></table>`:""}
+  </div>
+  <div class="card mt"><h2>Étiquettes et n° de série</h2>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap" class="no-print"><button type="button" data-act="sn" data-d="-1" ${S.snIndex?"":"disabled"} aria-label="Coffret précédent">◀</button><span aria-live="polite">Coffret ${S.snIndex+1} / ${o.qty} · <b class="mono">${sn(S.snIndex)}</b></span><button type="button" data-act="sn" data-d="1" ${S.snIndex<o.qty-1?"":"disabled"} aria-label="Coffret suivant">▶</button></div>
+    <div class="labels">
+      <div class="label"><div class="t"><span>Plaque produit</span><span>${CUSTOM[c.code].add?.[0]?.code==="CSO-00036"?"CSO-00036":"CSO-00031"}</span></div><div class="ref">${esc(c.ref)}</div><div>Ind. client ${esc(c.index)} · Réf. int. ${INTERNAL} ind. ${pf.index}</div><div>${esc(pf.label)}</div><div>N° série : <b>${sn(S.snIndex)}</b> · ${ofNo(o.of)}</div>${barcode(sn(S.snIndex))}<div class="hr">${sn(S.snIndex)}</div></div>
+      <div class="label"><div class="t"><span>Étiquette carton</span><span>CSO-00034</span></div><div class="ref">${esc(c.name)}</div><div>Cde ${o.no} · Réf. ${esc(c.ref)}</div><div>1 coffret · ${sn(S.snIndex)}</div><div>Poids brut : ${fr(k.unitGross,2)} kg</div>${barcode(INTERNAL+"/"+sn(S.snIndex))}<div class="hr">${INTERNAL}/${sn(S.snIndex)}</div></div>
+      <div class="label"><div class="t"><span>Étiquette palette</span><span>EMB-00020</span></div><div class="ref">Palette ${pNo} / ${k.pallets}</div><div>${esc(c.name)} · ${c.country} · ${c.incoterm}</div><div>${CARRIERS[o.carrier].name}</div><div>${onP} × ${esc(c.ref)} · ${sn((pNo-1)*PER_PALLET)} → ${sn((pNo-1)*PER_PALLET+onP-1)}</div><div>Poids brut : <b>${fr(pGross,1)} kg</b></div>${barcode(o.no+"-P"+pNo)}<div class="hr">${o.no}-P${pNo}</div></div>
+    </div>
+    <p class="small muted">N° de série attribués : <span class="mono">${sn(0)} → ${sn(o.qty-1)}</span>. La réf. client et la réf. interne figurent sur chaque étiquette.</p></div>`;
+};
+
+R.prix = () => {
+  const o = act(), k = compute(o);
+  const scale = v => v/k.N; let run = 0; const top = Math.max(k.old, k.total)*1.08;
+  const wf = k.bridge.map(([lab, v, tag]) => {
+    let from, to;
+    if (tag==="start"||tag==="end"){ from = 0; to = v; run = v; } else { from = run; to = run + v; run = to; }
+    const left = Math.min(from,to)/top*100, width = Math.max(.6, Math.abs(to-from)/top*100);
+    const color = tag==="start"||tag==="end" ? "var(--accent)" : v<0 ? "var(--ok)" : "var(--bad)";
+    const crit = tag.startsWith("c") ? ` <a class="critb" href="#/plan">n° ${tag.slice(1)}</a>` : "";
+    return `<span>${lab}${crit}</span><div class="track"><span style="left:${left}%;width:${width}%;background:${color}"></span></div><span class="n">${tag==="start"||tag==="end"?eur(scale(v)):(v<0?"−":"+")+eur(Math.abs(scale(v)))}</span>`; }).join("");
+  const TR = [[1,9],[10,19],[20,49],[50,199],[200,2000]];
+  const tranches = TR.map(([a,b]) => { const ka = compute({ ...o, qty:a }, true), kb = compute({ ...o, qty:b }, true), floor = ka.unit/(1-TARGET_MARGIN);
+    return `<tr ${k.N>=a&&k.N<=b?'class="sel"':""}><td>${a} – ${b}</td><td class="n">${eur(ka.unit)} → ${eur(kb.unit)}</td><td class="n">${eur(floor)}</td><td class="n"><span class="st ${ka.margin<0?"bad":ka.margin<TARGET_MARGIN?"warn":"ok"}">${fr(ka.margin*100,1)} %</span> → ${fr(kb.margin*100,1)} %</td><td>${k.unitPrice>=floor?'<span class="st ok">Prix couvert</span>':'<span class="st warn">Appliquer le prix plancher</span>'}</td></tr>`; }).join("");
+  const k5 = compute({ ...o, qty:5 }, true);
+  const ent = Object.entries(k.costs);
+  return pageHead("Prix de revient", `PRV industriel de ${INTERNAL} pour ${k.N} pièces (commande ${o.no}, nomenclature ${esc(k.c.name)}), hors frais de structure (direction, locaux). Le passage de l'ancien calcul PMI au calcul EOLIA est décomposé étape par étape.`, [5,2,6,7]) + `
+  <div class="kpis"><div class="kpi"><div class="l">PRV EOLIA / pce</div><div class="v">${eur(k.unit)}</div></div><div class="kpi"><div class="l">Ancienne méthode PMI / pce (recalculée)</div><div class="v">${eur(k.old/k.N)}</div><div class="d">dernier prix + 15 % FG</div></div>
+    <div class="kpi"><div class="l">Prix de vente / pce</div><div class="v">${eur(k.unitPrice)}</div><div class="d">${o.price!=null?"prix du devis":"tarif client, constant"}</div></div><div class="kpi"><div class="l">Marge (taux de marque)</div><div class="v" style="color:var(--${k.margin<TARGET_MARGIN?"bad":"ok"})">${fr(k.margin*100,1)} %</div><div class="d">${eur((k.unitPrice-k.unit)*k.N,0)} sur la commande</div></div></div>
+  <div class="card mt"><h2>De l'ancien calcul au calcul EOLIA (par pièce)</h2><div class="wf">${wf}</div>
+    <p class="small muted">Vert : baisse. Rouge : coût réel jusqu'ici invisible. Le forfait de 15 % masquait des coûts qui varient selon la commande : transport selon la zone, réglage et lancement selon la taille de lot.</p></div>
+  <div class="g2 mt">
+    <div class="card"><h2>Détail par poste</h2><div class="scroll"><table><thead><tr><th>Poste</th><th class="n">/ pce</th><th class="n">Commande</th><th class="n">Part</th></tr></thead><tbody>
+      ${ent.map(([lab,v])=>`<tr><td>${lab}</td><td class="n">${eur(v/k.N)}</td><td class="n">${eur(v,0)}</td><td class="n">${fr(v/k.total*100,0)} %</td></tr>`).join("")}
+      </tbody><tfoot><tr><td>Total</td><td class="n">${eur(k.unit)}</td><td class="n">${eur(k.total,0)}</td><td></td></tr><tr><td class="muted">Forfait frais généraux 15 %</td><td class="n muted" colspan="3">retiré</td></tr></tfoot></table></div></div>
+    <div class="card"><h2>Tranches de production</h2><div class="scroll"><table><thead><tr><th>Quantité</th><th class="n">PRV / pce</th><th class="n">Prix plancher (${TARGET_MARGIN*100} %)</th><th class="n">Marge à ${eur(k.unitPrice)}</th><th></th></tr></thead><tbody>${tranches}</tbody></table></div>
+      <p class="small muted">Le prix de vente ne baisse pas avec la quantité. Plus la série est longue, plus le réglage et le lancement sont amortis : la marge monte toujours avec la quantité. Sous le plancher, le devis applique le prix plancher calculé pour la quantité demandée.</p>
+      <p class="small muted">L'ancien calcul ignorait réglage et lancement : même coût quelle que soit la quantité. À 5 pièces, il affichait ${eur(k5.old/5)} contre ${eur(k5.unit)} réels${k5.margin<0?", soit une vente à perte":""}.</p></div>
+  </div>`;
+};
+
+R.compta = () => {
+  const o = act(), k = compute(o);
+  const toBill = S.orders.flatMap(x => x.bls.filter(b=>!b.inv).map(b => ({ o:x, b })));
+  const sel = S.invoices.find(i => i.no === S.invSel) || S.invoices.filter(i=>i.order===o.no).at(-1);
+  const journal = inv => { const ox = orderOf(inv.order), c = CLIENTS[ox.client], eu = c.country !== "FR", ht = invHT(inv), tva = eu ? 0 : Math.round(ht*VAT*100)/100;
+    return [[c.account, `${c.name} ${inv.no}`, ht+tva, 0], [eu?"701200":"701100", `Ventes PF ${eu?"UE ":""}${inv.no}`, 0, ht], ...(eu?[]:[["445710", `TVA collectée 20 % ${inv.no}`, 0, tva]])]; };
+  const J = sel ? journal(sel) : null, selO = sel && orderOf(sel.order), selC = selO && CLIENTS[selO.client];
+  const ncCost = S.ncs.filter(n=>n.order===o.no).reduce((s,n)=>s+n.cost,0);
+  const cogs = [["Matière, composants, S/T", k.costs["Matière"]+k.costs["Composants"]+k.costs["Sous-traitance"]],["Consommables et emballages", k.costs["Consommables"]+k.costs["Emballage"]],["Production (machine, MO, réglage, lancement)", k.costs["Production (machine + MO)"]+k.costs["Mise en route"]+k.costs["Lancement (ADV, programmation)"]],["Transport (standard)", k.costs["Transport (standard)"]]];
+  return pageHead("Facturation et comptabilité", "Chaque BL devient une facture numérotée dans l'ordre chronologique. Les comptes de vente et de TVA dépendent du régime fiscal du client. Le cabinet comptable reçoit le journal des ventes sans ressaisie.") + `
+  <div class="g2">
+    <div class="card"><h2>BL à facturer</h2><div class="scroll"><table><thead><tr><th>BL</th><th>Date</th><th>Commande</th><th>Client</th><th class="n">Qté</th><th class="n">HT</th><th></th></tr></thead><tbody>
+      ${toBill.map(({o:x,b})=>`<tr><td class="mono">${b.no}</td><td>${dt(b.date)}</td><td class="mono">${x.no}</td><td>${esc(CLIENTS[x.client].name)}</td><td class="n">${b.qty}</td><td class="n">${eur(b.qty*priceOf(x),0)}</td><td><button class="sm primary" type="button" data-act="invoice" data-bl="${b.no}">Facturer</button></td></tr>`).join("") || `<tr><td colspan="7" class="muted">Aucun BL en attente.</td></tr>`}
+    </tbody></table></div></div>
+    <div class="card"><h2>Factures émises</h2><div class="scroll"><table><thead><tr><th>Facture</th><th>Date</th><th>Client</th><th>BL</th><th class="n">HT</th><th>Export</th></tr></thead><tbody>
+      ${S.invoices.slice().reverse().map(i=>`<tr class="click ${sel&&sel.no===i.no?"sel":""}" data-act="invSel" data-no="${i.no}" tabindex="0"><td class="mono">${i.no}</td><td>${dt(i.date)}</td><td>${esc(CLIENTS[orderOf(i.order).client].name)}</td><td class="mono small">${i.bl}</td><td class="n">${eur(invHT(i),0)}</td><td>${i.exported?'<span class="st ok">Exportée</span>':'<span class="st warn">À exporter</span>'}</td></tr>`).join("")}
+    </tbody></table></div>
+    <p style="margin:12px 0 0"><button class="primary" type="button" data-act="csv" ${S.invoices.some(i=>!i.exported)?"":"disabled"}>Exporter le journal des ventes (CSV)</button></p></div>
+  </div>
+  <div class="card mt">${sel ? `<h2>Écriture de la facture ${sel.no} (journal des ventes)</h2>
+    <p class="small" style="margin-top:-4px">${esc(selC.name)}${selC.vat?` · ${selC.vat}`:""} · ${sel.qty} × ${esc(selC.ref)} (${INTERNAL}) à ${eur(sel.price)} HT · ${sel.bl} · ${selC.country!=="FR"?"Exonération de TVA, art. 262 ter I du CGI":"TVA 20 %"}</p>
+    <div class="scroll"><table><thead><tr><th>Journal</th><th>Date</th><th>Compte</th><th>Libellé</th><th class="n">Débit</th><th class="n">Crédit</th></tr></thead><tbody>
+    ${J.map(([a,l,d,cr])=>`<tr><td>VE</td><td>${dt(sel.date)}</td><td class="mono">${a}</td><td>${esc(l)}</td><td class="n">${d?eur(d):""}</td><td class="n">${cr?eur(cr):""}</td></tr>`).join("")}
+    </tbody><tfoot><tr><td colspan="4">Équilibre</td><td class="n">${eur(J.reduce((s,r)=>s+r[2],0))}</td><td class="n">${eur(J.reduce((s,r)=>s+r[3],0))}</td></tr></tfoot></table></div>
+    ${selC.country!=="FR"?`<div class="alert warn mt"><b>EMEBI :</b> ${selC.country} · NC ${A[INTERNAL].customs} · masse nette ${fr(sel.qty*A[INTERNAL].weight,1)} kg · valeur ${eur(invHT(sel),0)}. <b>État récapitulatif TVA :</b> ${selC.vat} · ${eur(invHT(sel),0)}.</div>`:""}`
+    : `<h2>Facture prévisionnelle de ${o.no} (non numérotée)</h2><p class="muted" style="margin:0">Aucune facture tant qu'aucun BL n'est émis : l'écriture sera générée à la facturation du BL. Montant prévisionnel : ${eur(k.totalHT)} HT.</p>`}
+  </div>
+  <div class="card mt"><h2>Coût des ventes de ${o.no} (analytique)</h2><table><tbody>${cogs.map(([l,v])=>`<tr><td>${l}</td><td class="n">${eur(v,0)}</td></tr>`).join("")}${ncCost?`<tr><td>Coût de non-qualité (NC)</td><td class="n" style="color:var(--bad)">${eur(ncCost,0)}</td></tr>`:""}</tbody>
+    <tfoot><tr><td>Marge sur prix de revient</td><td class="n">${eur(k.totalHT-k.total-ncCost,0)}</td></tr></tfoot></table></div>`;
+};
+
+R.plan = () => {
+  const items = [...CRIT].sort((a,b)=>b.gain-a.gain);
+  const total = items.reduce((s,x)=>s+x.gain,0) + OTHERS_GAIN;
+  const bars = [...items.map(x=>({ lab:`n° ${x.id}`, v:x.gain, crit:true })), { lab:"30 autres", v:OTHERS_GAIN }];
+  const W = 640, H = 260, pad0 = 36, bw = (W-pad0*2)/bars.length, maxV = Math.max(...bars.map(b=>b.v));
+  let cum = 0; const pts = [];
+  const svgBars = bars.map((b,i) => { cum += b.v; const x = pad0 + i*bw, h = b.v/maxV*(H-80); pts.push([x+bw/2, H-30-(cum/total)*(H-80)]);
+    return `<rect x="${x+4}" y="${H-30-h}" width="${bw-8}" height="${h}" rx="3" fill="${b.crit?"var(--bad)":"var(--muted)"}"/><text x="${x+bw/2}" y="${H-12}" text-anchor="middle" font-size="11" fill="var(--muted)">${b.lab}</text><text x="${x+bw/2}" y="${H-34-h}" text-anchor="middle" font-size="11" fill="var(--ink)">${b.v} k€</text>`; }).join("");
+  const y80 = H-30-0.8*(H-80), share = (total-OTHERS_GAIN)/total;
+  return pageHead("Plan d'actions 80/20", `37 problèmes recensés dans le fichier « Blocs fonctionnels – FLUX ». <b>7 actions critiques (19 %)</b> portent <b>${fr(share*100,0)} %</b> des gains estimés : elles forment le lot 1 de l'ERP, et chacune est démontrée dans une page.`) + `
+  <div class="card"><h2>Pareto des gains annuels estimés</h2>
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Diagramme de Pareto : les 7 actions critiques représentent ${fr(share*100,0)} % des gains" style="width:100%;height:auto;max-height:320px">
+      <line x1="${pad0}" x2="${W-pad0}" y1="${y80}" y2="${y80}" stroke="var(--warn)" stroke-dasharray="5 4"/><text x="${pad0+2}" y="${y80-5}" font-size="11" fill="var(--warn)">80 % du gain cumulé</text>
+      ${svgBars}<polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>${pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="var(--accent)"/>`).join("")}
+    </svg>
+    <p class="small muted">Rouge : actions critiques. Courbe : cumul des gains. Montants fictifs, estimés pour illustrer la priorisation d'EOLIA.</p></div>
+  <div class="card mt"><h2>Lot 1 : problématiques et actions critiques</h2><div class="scroll"><table>
+    <thead><tr><th>N°</th><th>Problématique</th><th>Action à mettre en place</th><th>Réponse dans l'ERP</th><th class="n">Gain estimé</th><th>Voir</th></tr></thead><tbody>
+    ${CRIT.map(x=>`<tr><td><span class="critb">${x.id}</span></td><td>${esc(x.pb)}</td><td class="small">${esc(x.action)}</td><td class="small">${esc(x.how)}</td><td class="n">${x.gain} k€/an</td><td><a href="#/${x.page}">${PAGES.find(p=>p[1]===x.page)[2]}</a></td></tr>`).join("")}
+    </tbody></table></div></div>
+  <div class="card mt"><h2>Lots 2 et 3 : les 30 autres problèmes</h2><p class="small muted" style="margin-top:-4px">La criticité du fichier d'origine (1 = urgent et risqué, 3 = ni urgent ni risqué) mesure l'urgence et le risque. La sélection 80/20 mesure le gain : certains problèmes de criticité 1 passent donc en lot 2. Plusieurs sont déjà couverts dans la démo (codes-barres, PMAP, devis, BP, DP, codification fournisseurs…).</p>
+    <div class="scroll"><table><thead><tr><th>Crit.</th><th>Problème</th></tr></thead><tbody>${OTHERS.map(([c,t])=>`<tr><td>${c}</td><td>${esc(t)}</td></tr>`).join("")}</tbody></table></div></div>`;
+};
+
+R.glossaire = () => {
+  const qy = S.glossQ.toLowerCase();
+  const groups = GLOSS.map(([g, items]) => [g, items.filter(it => it.join(" ").toLowerCase().includes(qy))]).filter(([,it]) => it.length);
+  return `<div class="print-only" style="margin-bottom:10px"><b style="font-size:18px">EOLIA ERP : acronymes et termes utilisés</b><br><span>Démonstrateur, édition du ${dt(TODAY)}</span></div>` +
+  pageHead("Acronymes et termes", "Vocabulaire employé dans l'ERP et dans cette démonstration.") + `
+  <div class="card no-print" style="margin-bottom:16px;display:flex;gap:12px;flex-wrap:wrap;align-items:end"><div style="flex:1;min-width:220px"><label for="g-q" style="margin-top:0">Rechercher</label><input id="g-q" type="search" value="${esc(S.glossQ)}" data-bind="glossQ" placeholder="ex. PMAP, RAL, OF"></div>
+    <a href="EOLIA-acronymes.pdf" download style="padding:9px 0">Télécharger le PDF</a></div>
+  ${groups.map(([g, items]) => `<div class="card" style="margin-bottom:16px"><h2>${g}</h2><table><thead><tr><th style="width:140px">Sigle</th><th style="width:32%">Signification</th><th>Usage dans l'ERP</th></tr></thead><tbody>
+    ${items.map(([s,m,u])=>`<tr><td class="mono"><b>${esc(s)}</b></td><td>${esc(m)}</td><td>${esc(u)}</td></tr>`).join("")}</tbody></table></div>`).join("") || `<p>Aucun résultat.</p>`}`;
+};
+
+// ═══════════════════════════ Routeur ═══════════════════════════
+function currentPage(){ const key = location.hash.replace(/^#\/?/, "") || "accueil"; return PAGES.some(p=>p[1]===key) ? key : "accueil"; }
+function render(keepFocus){
+  const key = currentPage(), idx = PAGES.findIndex(p=>p[1]===key);
+  let grp = "";
+  $("nav").innerHTML = PAGES.map(([g,k2,t],i) => { const head = g!==grp ? `<span class="grp">${g}</span>` : ""; grp = g;
+    return `${head}<a href="#/${k2}" ${k2===key?'aria-current="page"':""}><span class="n">${i}</span>${t}</a>`; }).join("");
+  $("activeOrder").innerHTML = S.orders.map((o,i)=>`<option value="${i}" ${i===S.active?"selected":""}>${o.no} · ${esc(CLIENTS[o.client].name)}</option>`).join("");
+  const prev = PAGES[idx-1], next = PAGES[idx+1];
+  const fid = keepFocus && document.activeElement?.id;
+  $("view").innerHTML = R[key]() + `<nav class="pager" aria-label="Page précédente / suivante">${prev?`<a href="#/${prev[1]}"><small>← Précédent</small>${prev[2]}</a>`:"<span></span>"}${next?`<a href="#/${next[1]}" style="text-align:right"><small>Suivant →</small>${next[2]}</a>`:""}</nav>`;
+  document.title = `${PAGES[idx][2]} – EOLIA ERP`;
+  if (fid && $(fid)) { const el = $(fid); el.focus(); if (el.type==="search" || el.type==="text") el.setSelectionRange(el.value.length, el.value.length); }
+}
+window.addEventListener("hashchange", () => { S.rcv = null; S.ncOf = null; render(); window.scrollTo(0,0); $("view").focus({preventScroll:true}); });
+const clearOrderForm = () => Object.keys(S.form).filter(x => x === "bl-qty" || x.startsWith("buy-") || x.startsWith("sel-")).forEach(x => delete S.form[x]);
+$("activeOrder").addEventListener("change", e => { clearOrderForm(); S.active = +e.target.value; S.rcv = null; S.ncOf = null; S.rfq = null; render(); });
+
+// ═══════════════════════════ Actions ═══════════════════════════
+function createOrder(ci, qty, wish, extra={}){
+  const o = { no:"CC26-" + pad(S.seq.cc++), client:ci, qty, received:iso(TODAY), wish, status:"A_LANCER", of:S.seq.of, bls:[], picked:{},
+    carrier:cheapest(CLIENTS[ci].zone), useRepl:false, override:false, machines:{}, ...extra };
+  S.seq.of += 3; S.orders.push(o); syncCredit(o); S.active = S.orders.length-1; return o;
+}
+const ACT = {
+  activate: el => { clearOrderForm(); S.active = +el.dataset.i; location.hash = "#/commandes"; render(); },
+  article: el => { S.article = el.dataset.code; render(); },
+  override: () => { const o = act(); o.override = true; syncCredit(o); toast("Dépassement validé par la DAF : la commande peut être lancée."); render(); },
+  launch: () => { const o = act(); if (o.status !== "A_LANCER") return;
+    o.status = "EN_FAB"; const k = compute(o), miss = Object.values(k.mrp).filter(r => r.short > 0).length;
+    toast(`${ofNo(o.of)} lancé avec ${ofNo(o.of+1)} et ${ofNo(o.of+2)}.${miss?` ${miss} manquant(s) à couvrir (page Achats).`:""}`); render(); },
+  newOrder: () => { const f = [$("n-qty"), $("n-wish")]; if (!checkAll(f)) return;
+    const o = createOrder(+$("n-client").value, +f[0].value, f[1].value);
+    toast(`${o.no} créée : réf. ${CLIENTS[o.client].ref} → ${INTERNAL}${o.status==="BLOQUEE"?" · bloquée (encours)":""}.`); render(); },
+  quoteSave: () => { const f = [$("q-qty"), $("q-margin"), $("q-wish")]; if (!checkAll(f) || !S.quotePreview) return;
+    const p = S.quotePreview, d = { no:"DV26-" + pad(S.seq.dv++), date:iso(TODAY), valid:wd(22), status:"ENVOYE", ...p };
+    S.quotes.push(d); toast(`${d.no} enregistré : ${d.qty} pce à ${eur(d.price)} pour ${CLIENTS[d.client].name}.`); render(); },
+  quoteToOrder: el => { const d = S.quotes.find(x => x.no === el.dataset.no); if (!d || d.status !== "ENVOYE") return;
+    const late = d.wish < iso(TODAY), o = createOrder(d.client, d.qty, late ? wd(15) : d.wish, { price:d.price, quote:d.no });
+    d.status = "ACCEPTE"; d.order = o.no; toast(`${d.no} accepté → ${o.no}${o.status==="BLOQUEE"?" (bloquée : encours)":""}${late?` · date souhaitée dépassée, reportée au ${dt(o.wish)}`:""}.`); location.hash = "#/commandes"; render(); },
+  applySetup: el => { const p = S.pointages[+el.dataset.p], o = S.orders.find(x => compute(x, true).ofs.some(of => of.lines.some(l => l.code === p.op)));
+    const line = compute(o, true).ofs.flatMap(of=>of.lines).find(l=>l.code===p.op), op = S.routing[line.art][line.idx], m = line.op.machine;
+    const v = el.dataset.mode === "kit" ? p.min - (p.wait||0) : p.min; op.times[m][0] = v;
+    toast(`Gamme ${line.art} op. ${op.seq} (${m}) : réglage = ${v} min${el.dataset.mode==="kit"?" (attente matière supprimée par le kit bord de ligne)":""}.`); render(); },
+  simBadge: el => { S.sim.badge = el.dataset.b; render(); },
+  simRecord: () => {
+    const fm = $("sim-min"), fw = $("sim-wait"), els = fw ? [fm, fw] : [fm]; if (!checkAll(els)) return;
+    const min = +fm.value, wait = fw ? +fw.value : 0;
+    if (wait > min) { showErr(fw, "L'attente ne peut pas dépasser la durée du réglage."); fw.focus(); return; }
+    const code = $("sim-op").value;
+    S.pointages.push({ at:new Date().toTimeString().slice(0,5), badge:S.sim.badge, op:code, kind:S.sim.kind, min, ...(S.sim.kind==="SETUP"?{ wait }:{}) });
+    toast(`Pointage enregistré : ${OPERATORS[S.sim.badge]} · ${code} · ${min} min.`); render(); },
+  sn: el => { S.snIndex = Math.max(0, S.snIndex + +el.dataset.d); render(); },
+  rfq: el => { const code = el.dataset.code, a = A[code], r = compute(act()).mrp[code], qty = r.buyStock, alts = ALT_SUPPLIERS[a.type] || [];
+    const base = { supplier:a.supplier, price:a.dpa, moq:a.buy.moq||a.buy.factor, lead:a.lead, freight:a.type==="MP"?120:25 };
+    S.rfq = { no:"DP26-" + pad(S.seq.dp++), code, qty, offers:[ base,
+      { supplier:alts[0]||"F-00090 Fournisseur B", price:+(a.dpa*1.06).toFixed(3), moq:base.moq, lead:Math.max(2, Math.round(a.lead*0.5)), freight:base.freight },
+      { supplier:alts[1]||"F-00091 Fournisseur C", price:+(a.dpa*0.94).toFixed(3), moq:base.moq*4, lead:Math.round(a.lead*1.6), freight:base.freight*1.5 } ] };
+    S.rfqs.push(S.rfq); render(); },
+  rfqPick: el => { const f = S.rfq.offers[+el.dataset.i]; S.offerChoice[S.rfq.code] = f; S.rfq.chosen = f.supplier;
+    toast(`${S.rfq.no} : offre ${f.supplier} retenue pour ${S.rfq.code}.`); render(); },
+  placeCF: () => { const o = act(), k = compute(o), lines = [];
+    for (const r of Object.values(k.mrp)) {
+      const sel = $("sel-" + r.code); if (!sel || !sel.checked) continue; const a = A[r.code];
+      if (r.st) { lines.push({ code:r.code, supplier:a.supplier, packs:r.toOrder, unit:a.unit, qtyStock:r.toOrder, price:a.pmap, lead:a.lead }); continue; }
+      const inp = $("buy-" + r.code); if (!check(inp)) { inp.focus(); return; }
+      const ch = S.offerChoice[r.code], packs = +inp.value;
+      lines.push({ code:r.code, supplier:ch?ch.supplier:a.supplier, packs, unit:a.buy.unit, qtyStock:packs*a.buy.factor, price:ch?ch.price:a.dpa, lead:ch?ch.lead:a.lead });
+    }
+    if (!lines.length) { toast("Aucune ligne cochée.", true); return; }
+    const bySup = {}; lines.forEach(l => (bySup[l.supplier] ||= []).push(l));
+    const made = Object.entries(bySup).map(([supplier, ls]) => { const p = { no:"CF26-" + pad(S.seq.cf++), date:iso(TODAY), supplier, order:o.no,
+      lines:ls.map(l => ({ code:l.code, packs:l.packs, unit:l.unit, qtyStock:l.qtyStock, price:l.price, due:wd(l.lead), received:0 })) }; S.pos.push(p); return p; });
+    Object.keys(S.form).filter(x => x.startsWith("buy-") || x.startsWith("sel-")).forEach(x => delete S.form[x]);
+    toast(`${made.map(p => `${p.no} (${p.supplier.split(" ").slice(1).join(" ")})`).join(", ")} envoyée(s).`); render(); },
+  rcvOpen: el => { S.rcv = { cf:el.dataset.cf, i:+el.dataset.i }; ["rcv-qty","rcv-price","rcv-freight"].forEach(x => delete S.form[x]); render(); },
+  rcvCancel: () => { S.rcv = null; render(); },
+  rcvSave: () => { const f = [$("rcv-qty"), $("rcv-price"), $("rcv-freight")]; if (!checkAll(f)) return;
+    const p = S.pos.find(x => x.no === S.rcv.cf), l = p.lines[S.rcv.i], qty = +f[0].value;
+    const r = receive(l.code, qty, +f[1].value, +f[2].value, p.no); l.received += qty; S.rcv = null;
+    toast(`Réception ${p.no} · ${l.code} : +${q(qty)} ${A[l.code].unit}, lot ${r.lot}. PMAP ${fr(r.before,3)} → ${fr(r.after,3)} €.`); render(); },
+  bl: () => { const o = act(), f = $("bl-qty"); if (!check(f)) return; const qty = +f.value;
+    if (Object.keys(remaining(o)).some(c => !A[c].noStock)) { showErr(f, "Préparation incomplète : sortez toutes les lignes du bon de préparation avant d'éditer le BL."); f.focus(); return; }
+    const b = { no:"BL26-" + pad(S.seq.bl++), date:iso(TODAY), qty, inv:null }; o.bls.push(b); delete S.form["bl-qty"];
+    if (ral(o) === 0) o.status = "EXPEDIEE";
+    toast(`${b.no} édité : ${qty} coffret(s), RAL ${ral(o)}. Facture à émettre en comptabilité.`); render(); },
+  invoice: el => { const o = S.orders.find(x => x.bls.some(b => b.no === el.dataset.bl)), b = o.bls.find(x => x.no === el.dataset.bl);
+    const inv = { no:"FA26-" + pad(S.seq.fa++), date:iso(TODAY), order:o.no, bl:b.no, qty:b.qty, price:priceOf(o), exported:false };
+    b.inv = inv.no; S.invoices.push(inv); S.invSel = inv.no;
+    if (ral(o) === 0 && o.bls.every(x => x.inv)) o.status = "FACTUREE";
+    toast(`${inv.no} émise : ${eur(invHT(inv))} HT, écriture générée.`); render(); },
+  invSel: el => { S.invSel = el.dataset.no; render(); },
+  csv: () => { const rows = S.invoices.filter(i => !i.exported); if (!rows.length) return;
+    const head = ["JournalCode","EcritureDate","CompteNum","EcritureLib","PieceRef","Debit","Credit"];
+    const lines = [head]; rows.forEach(inv => { const ox = orderOf(inv.order), c = CLIENTS[ox.client], eu = c.country !== "FR", ht = invHT(inv), tva = eu ? 0 : Math.round(ht*VAT*100)/100;
+      [[c.account, `${c.name} ${inv.no}`, ht+tva, 0], [eu?"701200":"701100", `Ventes PF ${inv.no}`, 0, ht], ...(eu?[]:[["445710", `TVA collectée ${inv.no}`, 0, tva]])]
+        .forEach(([acc,lib,d,cr]) => lines.push(["VE", inv.date.replace(/-/g,""), acc, lib, inv.no, d.toFixed(2).replace(".",","), cr.toFixed(2).replace(".",",")])); });
+    const blob = new Blob(["﻿" + lines.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(";")).join("\r\n")], {type:"text/csv;charset=utf-8"});
+    const a = Object.assign(document.createElement("a"), { href:URL.createObjectURL(blob), download:`EOLIA-journal-ventes-${iso(TODAY)}.csv` });
+    a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); rows.forEach(i => i.exported = true);
+    toast(`${rows.length} facture(s) exportée(s) vers le cabinet comptable.`); render(); },
+  ncOpen: el => { S.ncOf = el.dataset.of; ["nc-op","nc-qty","nc-dec","nc-by","nc-cause"].forEach(x => delete S.form[x]); render(); },
+  ncCancel: () => { S.ncOf = null; render(); },
+  ncSave: el => { const f = $("nc-qty"); if (!check(f)) return;
+    const o = act(), k = compute(o, true), of = k.ofs.find(x => x.no === el.dataset.of), code = $("nc-op").value, qty = +f.value;
+    const upto = of.lines.slice(0, of.lines.findIndex(l => l.code === code) + 1), line = upto.at(-1);
+    const sub = explode(of.parent ? tree(o) : tree(o).children.find(c => c.code === of.code), 1, o.useRepl).needs;
+    const mat = Object.entries(sub).reduce((s,[c,v]) => s + v*A[c].pmap, 0), opsCost = upto.reduce((s,l) => s + l.unitCost, 0) + (of.parent ? k.ofs.filter(x => !x.parent).flatMap(x => x.lines).reduce((s,l) => s + l.unitCost, 0) : 0);
+    const n = { no:"NC26-" + pad(S.seq.nc++), order:o.no, of:of.no, op:code, qty, cause:$("nc-cause").value, decision:$("nc-dec").value, by:$("nc-by").value };
+    if (n.decision === "Retouche") { const rw = { no:ofNo(S.seq.of++), nc:n.no, op:code, qty, machine:line.op.machine, hours:(setupOf(line.op) + line.run*qty)/60 };
+      S.reworks.push(rw); n.rework = rw.no; n.cost = rw.hours*lineRate(line.op); }
+    else n.cost = n.decision === "Rebut" ? qty*(mat + opsCost) : 0;
+    S.ncs.push(n); S.ncOf = null; toast(`${n.no} enregistrée (${n.decision.toLowerCase()}) : ${eur(n.cost)}${n.rework?` · ${n.rework} créé`:""}.`); render(); },
+  archive: () => { const code = S.article, a = A[code], reason = ($("arch-reason").value||"").trim();
+    const why = !reason ? "Motif d'archivage obligatoire." : (a.stock||0) > 0 ? `Stock non nul (${q(a.stock)} ${a.unit}) : soldez-le d'abord.` : reservedOF(code||"") > 0 ? "Article réservé par un OF." : whereUsed(code).length ? `Utilisé dans la nomenclature de ${whereUsed(code).join(", ")}.` : code===INTERNAL ? "Article utilisé par des commandes en cours." : "";
+    if (why) { showErr($("arch-reason"), why); $("arch-reason").focus(); return; }
+    a.archived = { date:iso(TODAY), reason }; delete S.form["arch-reason"]; toast(`${code} archivé : il n'apparaît plus dans les listes de saisie.`); render(); },
+  unarchive: () => { delete A[S.article].archived; toast(`${S.article} réactivé.`); render(); },
+  supplierAdd: () => { const el = $("sup-name"), name = el.value.trim(); if (!name) { showErr(el, "Raison sociale obligatoire."); return; }
+    const all = allSuppliers(), dup = all.find(s => normName(s.name) === normName(name));
+    if (dup) { showErr(el, `Doublon : ce fournisseur existe déjà sous le code ${dup.code} (${dup.name}).`); el.focus(); return; }
+    const code = "F-" + pad(Math.max(...all.map(s => +s.code.slice(2))) + 1); S.suppliersAdded.push({ code, name }); delete S.form["sup-name"];
+    toast(`Fournisseur ${code} créé (code généré automatiquement).`); render(); },
+  countOpen: el => { const a = A[el.dataset.code]; S.count = { code:el.dataset.code, lot:a.lots[0]?.lot }; delete S.form["cnt-qty"]; render(); },
+  countCancel: () => { S.count = null; render(); },
+  countSave: () => { const f = $("cnt-qty"); if (!check(f)) return;
+    const { code, lot } = S.count, a = A[code], l = a.lots.find(x => x.lot === lot), diff = +f.value - l.qty;
+    if (Math.abs(diff) > 1e-9) { a.hist.push({ date:iso(TODAY), type:"ADJ", lot, qty:diff }); replay(a); }
+    S.lastCount[code] = iso(TODAY); S.count = null; delete S.form["cnt-qty"];
+    toast(`Comptage ${code} validé : écart ${diff>0?"+":""}${q(diff)} ${a.unit} (${eur(diff*a.pmap)} au PMAP).`); render(); },
+};
+const view = $("view");
+view.addEventListener("click", e => { const el = e.target.closest("[data-act]"); if (el && ACT[el.dataset.act] && !el.disabled) ACT[el.dataset.act](el); });
+view.addEventListener("keydown", e => { if (e.key==="Enter" && e.target.matches("tr[data-act]")) e.target.click(); });
+
+// Saisie : texte et listes appliqués aussitôt ; nombres et dates validés à la sortie du champ.
+const deferred = el => el.type==="number" || el.type==="date";
+view.addEventListener("input", e => { const el = e.target;
+  if (el.dataset.form !== undefined) { S.form[el.id] = el.type==="checkbox" ? (el.checked?"on":"off") : el.value; if (el.tagName==="SELECT" && el.dataset.live !== undefined) render(true); return; }
+  if (!deferred(el)) field(el); });
+view.addEventListener("change", e => { const el = e.target;
+  if (el.dataset.pick) return pick(el);
+  if (!deferred(el)) return;
+  if (el.dataset.form !== undefined) { S.form[el.id] = el.value; if (check(el) && el.dataset.live !== undefined) render(true); return; }
+  field(el); });
+function field(el){
+  const o = act();
+  if (deferred(el) && !check(el)) return;
+  if (el.dataset.bind) {
+    const b = el.dataset.bind;
+    if (b==="qty") { const v = +el.value; if (v > o.qty) o.override = false; o.qty = v; syncCredit(o); }
+    else if (b==="wish") o.wish = el.value;
+    else if (b==="carrier") o.carrier = el.value;
+    else if (b==="useRepl") o.useRepl = el.checked;
+    else if (b==="grouped") S.grouped = el.checked;
+    else if (b==="showArchived") S.showArchived = el.checked;
+    else if (b==="simKind") S.sim.kind = el.value;
+    else if (b==="countLot") S.count.lot = el.value;
+    else S[b] = el.value; // artFilter, artType, glossQ, histArt
+    render(true);
+  } else if (el.dataset.route) {
+    const [art, i, f] = el.dataset.route.split("|"), op = S.routing[art][+i];
+    if (f==="machine") { op.machine = el.value; toast(`Machine préférée de ${art} op. ${op.seq} : ${op.machine}.`); }
+    else if (f==="setup") op.times[op.machine][0] = +el.value;
+    else if (f==="run") op.times[op.machine][1] = +el.value;
+    else if (f==="ops") op.ops = +el.value;
+    render(true);
+  } else if (el.dataset.assign) assign(el.dataset.assign, el.value);
+}
+function pick(el){ const o = act(), code = el.dataset.pick, qty = +el.dataset.qty;
+  const miss = issue(code, qty, `BP26-${pad(o.of)} · ${o.no}`);
+  if (miss < 0) { el.checked = false; toast(`Sortie refusée : stock ${code} insuffisant, manque ${q(-miss)} ${A[code].unit}. Réceptionnez la commande fournisseur d'abord.`, true); return; }
+  o.picked[code] = true; toast(`${code} : ${q(qty)} ${A[code].unit} sortis du magasin (FIFO).`); render(); }
+function assign(key, m){
+  if (["EXPEDIEE","FACTUREE"].includes(act().status)) { toast(`${act().no} est soldée : affectation impossible.`, true); render(); return; }
+  const [art, i] = key.split("|"), op = S.routing[art][+i];
+  if (!op.times[m]) { toast(`Refusé : la gamme de ${art} op. ${op.seq} ne prévoit pas ${m}.`, true); render(); return; }
+  act().machines[key] = m; toast(`${act().no} · ${art} op. ${op.seq} affectée à ${m} : temps de la gamme alternative appliqués.`); render();
+}
+let dragKey = null;
+view.addEventListener("dragstart", e => { const c = e.target.closest("[data-drag]"); if (c) { dragKey = c.dataset.drag; e.dataTransfer.setData("text/plain", dragKey); } });
+view.addEventListener("dragover", e => { const col = e.target.closest("[data-drop]"); if (col && dragKey) { e.preventDefault(); col.classList.add("over"); } });
+view.addEventListener("dragleave", e => { e.target.closest("[data-drop]")?.classList.remove("over"); });
+view.addEventListener("drop", e => { const col = e.target.closest("[data-drop]"); if (!col || !dragKey) return; e.preventDefault(); const key = dragKey; dragKey = null; assign(key, col.dataset.drop); });
+
+$("themeBtn").addEventListener("click", () => {
+  const r = document.documentElement, dark = r.dataset.theme ? r.dataset.theme==="dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  r.dataset.theme = dark ? "light" : "dark";
+});
+S.orders.forEach(syncCredit);
+render();
+</script>
+</body>
+</html>
