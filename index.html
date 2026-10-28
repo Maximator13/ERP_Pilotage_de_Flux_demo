@@ -476,7 +476,7 @@ function receive(code, qty, price, freight, ref){ const a = A[code], before = a.
 const fr = (v,d=2) => Number(v).toLocaleString("fr-FR",{minimumFractionDigits:d,maximumFractionDigits:d});
 const q  = v => Number(v).toLocaleString("fr-FR",{maximumFractionDigits:3});
 const eur = (v,d=2) => fr(v,d)+" €";
-const dt = d => d ? D(d).toLocaleDateString("fr-FR") : "—";
+const dt = d => d ? D(d).toLocaleDateString("fr-FR") : "-";
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const $ = id => document.getElementById(id);
 const act = () => S.orders[S.active];
@@ -540,7 +540,7 @@ const OTHERS = [ // les 30 autres problèmes du fichier « Blocs fonctionnels �
   [1,"Frais généraux non pris en compte dans la nomenclature"],[1,"Pas de réf. externe client sur les étiquettes"],[1,"Pas d'articles de remplacement"],
   [1,"Traçabilité non gérée hors entrée en stock"],[1,"Prévisions de vente et codes ABC non utilisés"],[1,"Pas de codes-barres sur les produits"],
   [1,"Devis non saisis dans l'ERP"],[1,"Bons de préparation non gérés"],[1,"Factures transmises mensuellement à la main"],
-  [1,"Fournisseurs codifiés manuellement"],[1,"Demandes de prix non gérées"],["—","Code gestion qui dérive de la Fab vers l'Achat"],
+  [1,"Fournisseurs codifiés manuellement"],[1,"Demandes de prix non gérées"],["-","Code gestion qui dérive de la Fab vers l'Achat"],
   [2,"Articles inutilisés / consommables non suivis"],[2,"Fournitures industrielles non gérées (étiquettes, huiles, cartons)"],[2,"Pas de tranches de production"],
   [2,"Pas de comptabilité analytique par sous-composant"],[2,"Conditionnements renseignés jamais utilisés"],[2,"Dépôt et emplacements incohérents (5S)"],
   [2,"Quantité économique non utilisée"],[2,"Forte volatilité des prix (passage au PMAP)"],[2,"Valorisation au poste plutôt qu'à la machine"],
@@ -688,7 +688,7 @@ R.accueil = () => {
   </div>
   <div class="card mt"><h2>Commandes clients</h2><div class="scroll"><table>
     <thead><tr><th>N°</th><th>Client</th><th>Réf. client → interne</th><th class="n">Qté</th><th class="n">Livré</th><th class="n">RAL</th><th class="n">Montant HT</th><th>Souhaitée</th><th>Livraison prévue</th><th class="n">Marge</th><th>Statut</th></tr></thead><tbody>
-    ${all.map(({o,k},i)=>`<tr class="click ${i===S.active?"sel":""}" data-act="activate" data-i="${i}" tabindex="0"><td class="mono">${o.no}</td><td>${esc(k.c.name)}</td><td class="mono small">${esc(k.c.ref)} → ${INTERNAL}</td><td class="n">${o.qty}</td><td class="n">${delivered(o)}</td><td class="n"><b>${ral(o)}</b></td><td class="n">${eur(k.totalHT,0)}</td><td>${dt(o.wish)}</td><td>${k.delivery?`<span class="st ${k.late?"bad":"ok"}">${dt(k.delivery)}</span>`:"—"}</td><td class="n">${fr(k.margin*100,1)} %</td><td>${st(o)}</td></tr>`).join("")}
+    ${all.map(({o,k},i)=>`<tr class="click ${i===S.active?"sel":""}" data-act="activate" data-i="${i}" tabindex="0"><td class="mono">${o.no}</td><td>${esc(k.c.name)}</td><td class="mono small">${esc(k.c.ref)} → ${INTERNAL}</td><td class="n">${o.qty}</td><td class="n">${delivered(o)}</td><td class="n"><b>${ral(o)}</b></td><td class="n">${eur(k.totalHT,0)}</td><td>${dt(o.wish)}</td><td>${k.delivery?`<span class="st ${k.late?"bad":"ok"}">${dt(k.delivery)}</span>`:"-"}</td><td class="n">${fr(k.margin*100,1)} %</td><td>${st(o)}</td></tr>`).join("")}
   </tbody></table></div></div>
   <div class="g2 mt">
     <div class="card"><h2>Charge générée par le carnet ouvert</h2>${loadBars(open.reduce((acc,x)=>{ const f = x.o.status==="EN_FAB" ? ral(x.o)/x.k.N : 1; Object.entries(x.k.load).forEach(([m,h])=>acc[m]=(acc[m]||0)+h*f); return acc; },{}))}<p class="small muted">Heures machine (réglage + production) restant à faire sur les commandes ouvertes.</p></div>
@@ -721,7 +721,7 @@ R.devis = () => {
   return pageHead("Devis", "Chiffrage à partir de la nomenclature du client et de la gamme : prix de revient, prix plancher pour la marge cible, délai promis. Le devis accepté devient une commande sans ressaisie.", [1]) + `
   <div class="g2">
     <div class="card"><h2>Nouveau devis</h2>
-      <label for="q-client">Client</label><select id="q-client" data-form data-live>${CLIENTS.map((x,i)=>`<option value="${i}" ${i===ci?"selected":""}>${x.code} · ${esc(x.name)} — réf. ${esc(x.ref)}</option>`).join("")}</select>
+      <label for="q-client">Client</label><select id="q-client" data-form data-live>${CLIENTS.map((x,i)=>`<option value="${i}" ${i===ci?"selected":""}>${x.code} · ${esc(x.name)}, réf. ${esc(x.ref)}</option>`).join("")}</select>
       <div class="row"><div><label for="q-qty">Quantité</label>${numInput("q-qty", fv("q-qty",30), 'min="1" max="2000" step="1" data-form data-live')}</div>
       <div><label for="q-margin">Marge cible (%)</label>${numInput("q-margin", fv("q-margin",TARGET_MARGIN*100), 'min="0" max="60" step="0.5" data-form data-live')}</div>
       <div><label for="q-wish">Livraison souhaitée</label><input id="q-wish" type="date" value="${wish}" min="${wd(0)}" max="${wd(260)}" data-form data-live></div></div>
@@ -758,7 +758,7 @@ R.commandes = () => {
     </div>
     <div class="card"><h2>Commande directe (sans devis)</h2>
       <p class="small muted" style="margin:0">Le client envoie sa propre référence ; plus besoin de créer un article par client.</p>
-      <label for="n-client">Client</label><select id="n-client" data-form>${CLIENTS.map((x,i)=>`<option value="${i}" ${+fv("n-client",0)===i?"selected":""}>${x.code} · ${esc(x.name)} — réf. ${esc(x.ref)}</option>`).join("")}</select>
+      <label for="n-client">Client</label><select id="n-client" data-form>${CLIENTS.map((x,i)=>`<option value="${i}" ${+fv("n-client",0)===i?"selected":""}>${x.code} · ${esc(x.name)}, réf. ${esc(x.ref)}</option>`).join("")}</select>
       <div class="row"><div><label for="n-qty">Quantité</label>${numInput("n-qty", fv("n-qty",50), 'min="1" max="2000" step="1" data-form')}</div>
       <div><label for="n-wish">Livraison souhaitée</label><input id="n-wish" type="date" value="${fv("n-wish",wd(15))}" min="${wd(0)}" max="${wd(260)}" data-form></div></div>
       <p style="margin:14px 0 0"><button class="primary" type="button" data-act="newOrder">Créer la commande et l'activer</button></p>
@@ -786,7 +786,7 @@ R.articles = () => {
       <div><label for="a-t">Type</label><select id="a-t" data-bind="artType"><option value="">Tous</option>${[...new Set(Object.values(A).map(x=>x.type))].map(t=>`<option ${S.artType===t?"selected":""}>${t}</option>`).join("")}</select></div></div>
       <label class="check"><input type="checkbox" data-bind="showArchived" ${S.showArchived?"checked":""}> Afficher les articles archivés</label>
       <div class="scroll" style="margin-top:10px"><table><thead><tr><th>Code</th><th>Désignation</th><th>Type</th><th>U.</th><th class="n">Poids</th></tr></thead><tbody>
-      ${list.map(([cd,x])=>`<tr class="click ${cd===code?"sel":""} ${x.archived?"arch":""}" data-act="article" data-code="${cd}" tabindex="0"><td class="mono">${cd}</td><td>${esc(x.label)}${x.archived?' <span class="st mut">archivé</span>':""}</td><td><span class="type ${x.type}">${x.type.replace("_"," ")}</span></td><td>${x.unit}</td><td class="n">${x.weight!=null?q(x.weight)+" kg":"—"}</td></tr>`).join("")}
+      ${list.map(([cd,x])=>`<tr class="click ${cd===code?"sel":""} ${x.archived?"arch":""}" data-act="article" data-code="${cd}" tabindex="0"><td class="mono">${cd}</td><td>${esc(x.label)}${x.archived?' <span class="st mut">archivé</span>':""}</td><td><span class="type ${x.type}">${x.type.replace("_"," ")}</span></td><td>${x.unit}</td><td class="n">${x.weight!=null?q(x.weight)+" kg":"-"}</td></tr>`).join("")}
       </tbody></table></div></div>
     <div class="card"><h2>Fiche ${code}</h2>
       <dl class="kv">
@@ -841,7 +841,7 @@ R.nomenclature = () => {
     <thead><tr><th>Article</th><th>Désignation</th><th>Type</th><th class="n">Qté / parent</th><th class="n">Besoin total</th><th>U.</th><th class="n">PMAP</th><th class="n">Valeur</th></tr></thead><tbody>
     ${k.rows.map(r => { const a = A[r.code], leaf = !r.children;
       const conv = r.inputUnit ? `<br><span class="small muted">${q(r.input)} ${r.inputUnit} → ${q(r.qty)} KG · chute ${r.scrap*100} %</span>` : (r.note?`<br><span class="small muted">${r.note}</span>`:"");
-      return `<tr class="lvl${Math.min(r.lvl,2)} ${r.custom?"custom":""}"><td class="mono">${r.code}</td><td>${esc(a.label)}${r.custom?' <span class="cust">Client</span>':""}${conv}</td><td><span class="type ${a.type}">${a.type.replace("_"," ")}</span></td><td class="n">${r.lvl?q(r.qty):"—"}</td><td class="n">${q(r.total)}</td><td>${a.unit}</td><td class="n">${leaf?eur(a.pmap,3):""}</td><td class="n">${leaf?eur(r.total*a.pmap):""}</td></tr>`; }).join("")}
+      return `<tr class="lvl${Math.min(r.lvl,2)} ${r.custom?"custom":""}"><td class="mono">${r.code}</td><td>${esc(a.label)}${r.custom?' <span class="cust">Client</span>':""}${conv}</td><td><span class="type ${a.type}">${a.type.replace("_"," ")}</span></td><td class="n">${r.lvl?q(r.qty):"-"}</td><td class="n">${q(r.total)}</td><td>${a.unit}</td><td class="n">${leaf?eur(a.pmap,3):""}</td><td class="n">${leaf?eur(r.total*a.pmap):""}</td></tr>`; }).join("")}
   </tbody></table></div>
   <p class="small muted">Personnalisation ${esc(c.name)} : ${esc(CUSTOM[c.code].label)}, soit ${eur(k.customCost/k.N)} par coffret. Les autres clients gardent la même base standard avec leur propre surcouche.</p></div>
   <div class="card mt"><h2>Gammes : prix de chaque ligne</h2>
@@ -865,22 +865,22 @@ R.stocks = () => {
   return pageHead("Stocks et inventaire", `Valorisation au PMAP, sortie physique FIFO par lot, allocations par client. Stock disponible pour <b>${esc(c.name)}</b> = calcul des besoins par priorité (voir Achats).`, [3]) + `
   <div class="card"><h2>Action critique n° 3 : allocation mensuelle par client récurrent</h2>
     <div class="scroll"><table><thead><tr><th>Article</th>${CLIENTS.map(x=>`<th class="n">${esc(x.name)}</th>`).join("")}<th class="n">Total alloué</th></tr></thead><tbody>
-    ${Object.entries(ALLOC).map(([cd,al])=>`<tr><td class="mono">${cd}</td>${CLIENTS.map(x=>`<td class="n">${al[x.code]?q(al[x.code])+" "+A[cd].unit:"—"}</td>`).join("")}<td class="n">${q(allocTotal(cd))}</td></tr>`).join("")}
+    ${Object.entries(ALLOC).map(([cd,al])=>`<tr><td class="mono">${cd}</td>${CLIENTS.map(x=>`<td class="n">${al[x.code]?q(al[x.code])+" "+A[cd].unit:"-"}</td>`).join("")}<td class="n">${q(allocTotal(cd))}</td></tr>`).join("")}
     </tbody></table></div>
     ${mpRow && mpNo ? (() => { const myAl = (ALLOC["MP-00052"]||{})[c.code]||0; return `<div class="alert ${myAl?"info":"warn"} mt"><b>Tôle MP-00052 pour ${o.no} (${esc(c.name)}) :</b> ${q(mpRow.avail)} kg disponibles avec les allocations, ${q(mpNo.avail)} kg sans. ${myAl ? `${q(myAl)} kg sont réservés chaque mois à ce client récurrent : les autres commandes ne peuvent pas les consommer.${mpNo.avail > mpRow.avail ? ` Son disponible libre est diminué des ${q(allocTotal("MP-00052")-myAl)} kg alloués aux autres clients récurrents.` : ""}` : `Ce client n'a pas d'allocation sur la tôle : il passe après les commandes prioritaires et les clients alloués.`}</div>`; })() : ""}
   </div>
   <div class="card mt"><h2>État du stock</h2><div class="scroll"><table>
     <thead><tr><th>Article</th><th>Empl.</th><th class="n">Physique</th><th class="n">Réservé OF</th><th class="n">Alloué clients</th><th class="n">Dispo ${esc(c.name)}</th><th class="n">Besoin ${o.no}</th><th class="n">Stock sécu.</th><th class="n">PMAP</th><th class="n">Valeur</th><th>ABC</th></tr></thead><tbody>
     ${rows.map(([cd,a])=>{ const r = (k.mrp||{})[cd];
-      return `<tr><td class="mono">${cd}</td><td class="mono small">${a.loc}</td><td class="n">${q(a.stock)}</td><td class="n">${q(reservedOF(cd))}</td><td class="n">${q(allocTotal(cd))}</td><td class="n">${r?`<b>${q(r.avail)}</b>`:"—"}</td><td class="n">${r?`<span class="st ${r.need>r.avail+r.onOrder?"bad":"ok"}">${q(r.need)}</span>`:"—"}</td><td class="n">${q(a.safety)}</td><td class="n">${eur(a.pmap,3)}</td><td class="n">${eur(a.stock*a.pmap,0)}</td><td>${abc[cd]}</td></tr>`; }).join("")}
+      return `<tr><td class="mono">${cd}</td><td class="mono small">${a.loc}</td><td class="n">${q(a.stock)}</td><td class="n">${q(reservedOF(cd))}</td><td class="n">${q(allocTotal(cd))}</td><td class="n">${r?`<b>${q(r.avail)}</b>`:"-"}</td><td class="n">${r?`<span class="st ${r.need>r.avail+r.onOrder?"bad":"ok"}">${q(r.need)}</span>`:"-"}</td><td class="n">${q(a.safety)}</td><td class="n">${eur(a.pmap,3)}</td><td class="n">${eur(a.stock*a.pmap,0)}</td><td>${abc[cd]}</td></tr>`; }).join("")}
     </tbody><tfoot><tr><td colspan="9">Valeur totale au PMAP</td><td class="n">${eur(tot,0)}</td><td></td></tr></tfoot></table></div></div>
   <div class="g2 mt">
     <div class="card"><h2>Entrées, sorties et PMAP</h2>
       <label for="h-art" style="margin-top:0">Article</label><select id="h-art" data-bind="histArt">${rows.map(([cd])=>`<option ${cd===S.histArt?"selected":""}>${cd}</option>`).join("")}</select>
       <div class="scroll mt"><table><thead><tr><th>Date</th><th>Mouvement</th><th class="n">Qté</th><th class="n">Coût d'entrée</th><th class="n">Stock après</th><th class="n">PMAP après</th></tr></thead><tbody>
-      ${ha.hist.map(m=>`<tr><td>${dt(m.date)}</td><td>${m.type==="IN"?(m.init?"Stock d'ouverture":`Réception <span class="mono">${m.lot}</span>${m.ref?` · ${esc(m.ref)}`:""}`):m.type==="OUT"?`Sortie ${esc(m.ref)}`:`Ajustement inventaire${m.lot?` <span class="mono">${m.lot}</span>`:""}`}</td><td class="n">${m.type==="OUT"?"−":m.type==="ADJ"&&m.qty<0?"":"+"}${q(m.qty)}</td><td class="n">${m.type==="IN"?fr(m.price+(m.freight||0)/m.qty,4):"—"}</td><td class="n">${q(m.stockAfter)}</td><td class="n">${fr(m.pmapAfter,4)}</td></tr>`).join("")}
+      ${ha.hist.map(m=>`<tr><td>${dt(m.date)}</td><td>${m.type==="IN"?(m.init?"Stock d'ouverture":`Réception <span class="mono">${m.lot}</span>${m.ref?` · ${esc(m.ref)}`:""}`):m.type==="OUT"?`Sortie ${esc(m.ref)}`:`Ajustement inventaire${m.lot?` <span class="mono">${m.lot}</span>`:""}`}</td><td class="n">${m.type==="OUT"?"−":m.type==="ADJ"&&m.qty<0?"":"+"}${q(m.qty)}</td><td class="n">${m.type==="IN"?fr(m.price+(m.freight||0)/m.qty,4):"-"}</td><td class="n">${q(m.stockAfter)}</td><td class="n">${fr(m.pmapAfter,4)}</td></tr>`).join("")}
       </tbody></table></div>
-      <p class="small muted">Le PMAP est recalculé à chaque réception (prix + fret). Une sortie le laisse inchangé. Dernier prix d'achat : ${fr(ha.dpa,3)} € — c'est lui qui valorisait tout le stock dans PMI.</p></div>
+      <p class="small muted">Le PMAP est recalculé à chaque réception (prix + fret). Une sortie le laisse inchangé. Dernier prix d'achat : ${fr(ha.dpa,3)} € : c'est lui qui valorisait tout le stock dans PMI.</p></div>
     <div class="card"><h2>Lots en stock (ordre FIFO)</h2><table><thead><tr><th>Lot</th><th>Entrée</th><th class="n">Reste</th><th class="n">Coût d'entrée</th></tr></thead><tbody>
       ${ha.lots.map((l,i)=>`<tr><td class="mono">${l.lot}${i===0?' <span class="st info">prochaine sortie</span>':""}</td><td>${dt(l.date)}</td><td class="n">${q(l.qty)} ${ha.unit}</td><td class="n">${fr(l.cost,4)}</td></tr>`).join("")}
       </tbody></table><p class="small muted">Sortie : le lot le plus ancien d'abord. Un lot vide passe au suivant ; une sortie supérieure au stock est refusée (pas de stock négatif).</p></div>
@@ -914,8 +914,8 @@ R.achats = () => {
   ${rows.length?`<div class="card"><div class="scroll"><table>
     <thead><tr><th></th><th>Article</th><th class="n">Besoin</th><th class="n">Pris par cdes prioritaires</th><th class="n">Disponible</th><th class="n">En commande</th><th class="n">Manque</th><th>Suggestion (unité d'achat)</th><th>Fournisseur</th><th class="n">Montant</th><th></th></tr></thead><tbody>
     ${rows.map(r=>{ const a = A[r.code], ch = S.offerChoice[r.code], sup = ch ? ch.supplier : a.supplier, price = ch ? ch.price : a.dpa, moq = ch ? ch.moq : (a.buy?.moq||1);
-      if (r.st) return `<tr><td>${r.toOrder>0?`<input type="checkbox" id="sel-${r.code}" data-form ${fv("sel-"+r.code,"on")==="on"?"checked":""} aria-label="Sélectionner ${r.code}">`:""}</td><td class="mono">${r.code}</td><td class="n">${q(r.need)} ${a.unit}</td><td class="n muted">—</td><td class="n muted">—</td><td class="n">${r.onOrder?q(r.onOrder):"—"}</td><td class="n muted">—</td><td>${r.toOrder>0?`${q(r.toOrder)} ${a.unit} <span class="small muted">· S/T liée à l'OF</span>`:`<span class="st ok">Commandée</span>`}</td><td>${esc(a.supplier)}</td><td class="n">${r.toOrder>0?eur(r.toOrder*a.pmap,0):""}</td><td></td></tr>`;
-      return `<tr><td>${r.buy>0?`<input type="checkbox" id="sel-${r.code}" data-form ${fv("sel-"+r.code, r.short>0?"on":"off")==="on"?"checked":""} aria-label="Sélectionner ${r.code}">`:""}</td><td class="mono">${r.code}</td><td class="n">${q(r.need)} ${a.unit}</td><td class="n">${r.taken?q(r.taken):"—"}</td><td class="n">${q(r.avail)}</td><td class="n">${r.onOrder?`<span class="st info">${q(r.onOrder)}</span>`:"—"}</td><td class="n">${r.short?`<span class="st bad">${q(r.short)}</span>`:"0"}</td>
+      if (r.st) return `<tr><td>${r.toOrder>0?`<input type="checkbox" id="sel-${r.code}" data-form ${fv("sel-"+r.code,"on")==="on"?"checked":""} aria-label="Sélectionner ${r.code}">`:""}</td><td class="mono">${r.code}</td><td class="n">${q(r.need)} ${a.unit}</td><td class="n muted">-</td><td class="n muted">-</td><td class="n">${r.onOrder?q(r.onOrder):"-"}</td><td class="n muted">-</td><td>${r.toOrder>0?`${q(r.toOrder)} ${a.unit} <span class="small muted">· S/T liée à l'OF</span>`:`<span class="st ok">Commandée</span>`}</td><td>${esc(a.supplier)}</td><td class="n">${r.toOrder>0?eur(r.toOrder*a.pmap,0):""}</td><td></td></tr>`;
+      return `<tr><td>${r.buy>0?`<input type="checkbox" id="sel-${r.code}" data-form ${fv("sel-"+r.code, r.short>0?"on":"off")==="on"?"checked":""} aria-label="Sélectionner ${r.code}">`:""}</td><td class="mono">${r.code}</td><td class="n">${q(r.need)} ${a.unit}</td><td class="n">${r.taken?q(r.taken):"-"}</td><td class="n">${q(r.avail)}</td><td class="n">${r.onOrder?`<span class="st info">${q(r.onOrder)}</span>`:"-"}</td><td class="n">${r.short?`<span class="st bad">${q(r.short)}</span>`:"0"}</td>
         <td>${r.buy>0?`${numInput("buy-"+r.code, fv("buy-"+r.code, Math.max(r.buy, ch?Math.ceil(ch.moq/a.buy.factor):0)), `class="mini" min="${Math.max(1,Math.ceil(moq/a.buy.factor))}" max="100000" step="1" data-form`, `Quantité à commander ${r.code} en ${a.buy.unit}`)} ${a.buy.unit} <span class="small muted">= ${q(r.buyStock)} ${a.unit}${r.belowSafety?" · réappro sécurité":""}</span>`:`<span class="st ok">Stock OK</span>`}</td>
         <td>${esc(sup)}${ch?' <span class="st info">offre DP</span>':""}</td><td class="n">${r.buy>0?eur(r.buyStock*price,0):""}</td>
         <td>${r.buy>0?`<button class="sm" type="button" data-act="rfq" data-code="${r.code}">Consulter (DP)</button>`:""}</td></tr>`; }).join("")}
@@ -965,7 +965,7 @@ R.production = () => {
     <div class="small" style="margin-top:6px">${fr(of.hours,1)} h · ${eur(of.cost,0)}</div>
     ${o.status==="EN_FAB"?(S.ncOf===of.no?ncForm(of, k):`<p style="margin:8px 0 0" class="no-print"><button class="sm" type="button" data-act="ncOpen" data-of="${of.no}">Déclarer une NC</button></p>`):""}</div>`).join("")}</div>
   <div class="card mt"><h2>Non-conformités de la commande ${o.no}</h2><div class="scroll"><table><thead><tr><th>NC</th><th>OF / opération</th><th class="n">Qté</th><th>Cause</th><th>Décision</th><th class="n">Coût</th><th>OF de retouche</th></tr></thead><tbody>
-    ${ncs.map(n=>`<tr><td class="mono">${n.no}</td><td class="mono small">${n.op}</td><td class="n">${n.qty}</td><td>${n.cause}</td><td>${n.decision}</td><td class="n">${eur(n.cost)}</td><td class="mono">${n.rework||"—"}</td></tr>`).join("") || `<tr><td colspan="7" class="muted">Aucune NC déclarée.</td></tr>`}
+    ${ncs.map(n=>`<tr><td class="mono">${n.no}</td><td class="mono small">${n.op}</td><td class="n">${n.qty}</td><td>${n.cause}</td><td>${n.decision}</td><td class="n">${eur(n.cost)}</td><td class="mono">${n.rework||"-"}</td></tr>`).join("") || `<tr><td colspan="7" class="muted">Aucune NC déclarée.</td></tr>`}
   </tbody></table></div></div>
   <div class="card mt"><div class="row" style="align-items:center"><h2 style="margin:0">Planning Kanban par machine</h2>
     <label class="check" style="margin:0"><input type="checkbox" data-bind="grouped" ${S.grouped?"checked":""}> Regrouper les découpes des 2 S/E (même tôle : un seul réglage)</label></div>
@@ -1013,7 +1013,7 @@ R.atelier = () => {
       <p style="margin:12px 0 0"><button class="primary" type="button" data-act="simRecord" ${S.sim.badge?"":"disabled"}>Démarrer puis arrêter (enregistrer)</button></p>
       <p class="small muted">Sur la tablette, l'opérateur scanne au début et à la fin : la durée est mesurée, pas déclarée. Toute valeur négative est refusée.</p></div>
     <div class="card"><h2>Journal des pointages</h2><div class="scroll"><table><thead><tr><th>Heure</th><th>Opérateur</th><th>Opération</th><th>Type</th><th class="n">Durée</th><th class="n">Attente</th></tr></thead><tbody>
-      ${S.pointages.slice().reverse().map(p=>`<tr><td>${p.at}</td><td>${OPERATORS[p.badge]}</td><td class="mono small">${p.op}</td><td>${p.kind==="SETUP"?"Réglage":"Production"}</td><td class="n">${q(p.min)} min</td><td class="n">${p.kind==="SETUP"?q(p.wait||0)+" min":"—"}</td></tr>`).join("")}
+      ${S.pointages.slice().reverse().map(p=>`<tr><td>${p.at}</td><td>${OPERATORS[p.badge]}</td><td class="mono small">${p.op}</td><td>${p.kind==="SETUP"?"Réglage":"Production"}</td><td class="n">${q(p.min)} min</td><td class="n">${p.kind==="SETUP"?q(p.wait||0)+" min":"-"}</td></tr>`).join("")}
       </tbody></table></div></div>
   </div>`;
 };
@@ -1051,13 +1051,13 @@ R.expedition = () => {
   <div class="card mt"><h2>Bon de préparation ${o.status==="EN_FAB"?`BP26-${pad(o.of)} · ${pickedCount}/${bpRows.length} lignes préparées`:""}</h2>
     ${o.status!=="EN_FAB" ? `<p class="muted" style="margin:0">${["A_LANCER","BLOQUEE"].includes(o.status)?"Lancez la commande en fabrication pour éditer le bon de préparation.":"Commande soldée : préparation terminée."}</p>` :
       groups.map(g=>`<h3>${g}</h3><div class="scroll"><table><thead><tr><th>Préparé</th><th>Article</th><th>Désignation</th><th class="n">Qté</th><th>Emplacement</th><th>Lot FIFO proposé</th></tr></thead><tbody>
-        ${bpRows.filter(r=>r.dest===g).map(r=>{ const a = A[r.code]; return `<tr ${r.custom?'class="custom"':""}><td><input type="checkbox" data-pick="${r.code}" data-qty="${r.qty}" ${o.picked[r.code]?"checked disabled":""} aria-label="Préparé ${r.code}"></td><td class="mono">${r.code}</td><td>${esc(a.label)}${r.custom?' <span class="cust">Client</span>':""}</td><td class="n">${q(r.qty)} ${a.unit}</td><td class="mono small">${a.loc}</td><td class="mono small">${o.picked[r.code]?"sorti":a.lots[0]?.lot||"—"}</td></tr>`; }).join("")}
+        ${bpRows.filter(r=>r.dest===g).map(r=>{ const a = A[r.code]; return `<tr ${r.custom?'class="custom"':""}><td><input type="checkbox" data-pick="${r.code}" data-qty="${r.qty}" ${o.picked[r.code]?"checked disabled":""} aria-label="Préparé ${r.code}"></td><td class="mono">${r.code}</td><td>${esc(a.label)}${r.custom?' <span class="cust">Client</span>':""}</td><td class="n">${q(r.qty)} ${a.unit}</td><td class="mono small">${a.loc}</td><td class="mono small">${o.picked[r.code]?"sorti":a.lots[0]?.lot||"-"}</td></tr>`; }).join("")}
       </tbody></table></div>`).join("") + `<p class="small muted">Cocher une ligne = scan de sortie magasin : le stock est décrémenté en FIFO, la réservation de l'OF disparaît. Une sortie supérieure au stock est refusée.</p>`}
   </div>
   <div class="card mt"><h2>Bon de livraison</h2>
     ${o.status==="EN_FAB" && R0>0 ? `<div class="row"><div><label for="bl-qty">Quantité de ce BL (RAL : ${R0})</label>${numInput("bl-qty", fv("bl-qty",R0), `min="1" max="${R0}" step="1" data-form data-live`)}</div>
-      <div><label>Palettes / poids brut</label><input type="text" disabled value="${kb?`${kb.pallets} pal. · ${fr(kb.gross,1)} kg`:"—"}"></div>
-      <div><label>Transport réel du BL</label><input type="text" disabled value="${kb?eur(kb.transportReal,0):"—"}"></div></div>
+      <div><label>Palettes / poids brut</label><input type="text" disabled value="${kb?`${kb.pallets} pal. · ${fr(kb.gross,1)} kg`:"-"}"></div>
+      <div><label>Transport réel du BL</label><input type="text" disabled value="${kb?eur(kb.transportReal,0):"-"}"></div></div>
       <p style="margin:12px 0 0"><button class="primary" type="button" data-act="bl">Éditer le BL ${blOk&&qBL<R0?"partiel":""}</button></p>`
     : `<p class="muted" style="margin:0">${R0===0?"Tout est livré.":"Le BL s'édite pour une commande en fabrication."}</p>`}
     ${o.bls.length?`<h3>BL émis</h3><table><thead><tr><th>BL</th><th>Date</th><th class="n">Qté</th><th>Facture</th></tr></thead><tbody>${o.bls.map(b=>`<tr><td class="mono">${b.no}</td><td>${dt(b.date)}</td><td class="n">${b.qty}</td><td class="mono">${b.inv||'<a href="#/compta">à facturer</a>'}</td></tr>`).join("")}</tbody></table>`:""}
